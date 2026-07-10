@@ -1,4 +1,4 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /**
  * Recognize dates using regex.
@@ -65,16 +65,8 @@ export class DateRecognizer extends PatternRecognizer {
       "\\b(([1-9]|0[1-9]|[1-2][0-9]|3[0-1])-(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))\\b",
       0.6,
     ),
-    new Pattern(
-      "mm/yyyy or m/yyyy",
-      "\\b(([1-9]|0[1-9]|1[0-2])/\\d{4})\\b",
-      0.2,
-    ),
-    new Pattern(
-      "mm/yy or m/yy",
-      "\\b(([1-9]|0[1-9]|1[0-2])/\\d{2})\\b",
-      0.1,
-    ),
+    new Pattern("mm/yyyy or m/yyyy", "\\b(([1-9]|0[1-9]|1[0-2])/\\d{4})\\b", 0.2),
+    new Pattern("mm/yy or m/yy", "\\b(([1-9]|0[1-9]|1[0-2])/\\d{2})\\b", 0.1),
   ];
 
   /** Context words that increase confidence in date detection. */
@@ -83,8 +75,8 @@ export class DateRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "DATE_TIME",
+    supportedLanguage = "en",
+    supportedEntity = "DATE_TIME",
     name: string | null = null,
   ) {
     super(
@@ -96,4 +88,26 @@ export class DateRecognizer extends PatternRecognizer {
       context ?? DateRecognizer.CONTEXT,
     );
   }
+
+  validateResult(patternText: string): boolean | null {
+    const iso = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:T|$)/.exec(patternText);
+    if (iso) return isCalendarDate(Number(iso[1]), Number(iso[2]), Number(iso[3]));
+
+    const numeric = /^(\d{1,2})[/. -](\d{1,2})[/. -](\d{2,4})$/.exec(patternText);
+    if (!numeric) return null;
+    const year = numeric[3].length === 2 ? 2000 + Number(numeric[3]) : Number(numeric[3]);
+    const first = Number(numeric[1]);
+    const second = Number(numeric[2]);
+    // Ambiguous numeric dates are valid when either US or day-first order is valid.
+    return isCalendarDate(year, first, second) || isCalendarDate(year, second, first);
+  }
+}
+
+function isCalendarDate(year: number, month: number, day: number): boolean {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
 }

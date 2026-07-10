@@ -1,13 +1,13 @@
 import {
+  AppTracer,
   EntityRecognizer,
   NlpArtifacts,
   RecognizerResult,
-  AppTracer,
-} from "@presidio/core";
+} from "@defend-tech/presidio-core";
+import type { ContextAwareEnhancer } from "../context/context-aware-enhancer.js";
+import { LemmaContextAwareEnhancer } from "../context/lemma-context-aware-enhancer.js";
 import { NlpEngine } from "../nlp/nlp-engine.js";
 import { RecognizerRegistry } from "../registry/recognizer-registry.js";
-import { LemmaContextAwareEnhancer } from "../context/lemma-context-aware-enhancer.js";
-import type { ContextAwareEnhancer } from "../context/context-aware-enhancer.js";
 
 /**
  * Default regex flags matching Python `re.DOTALL | re.MULTILINE | re.IGNORECASE`.
@@ -17,24 +17,154 @@ const DEFAULT_REGEX_FLAGS = "gmsi";
 
 /** Built-in English stopwords used by the fallback NLP engine. */
 const STOP_WORDS = new Set([
-  "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-  "of", "with", "by", "from", "is", "it", "as", "be", "this", "that",
-  "are", "was", "were", "has", "have", "had", "not", "no", "do", "does",
-  "did", "will", "would", "shall", "should", "may", "might", "can", "could",
-  "its", "my", "your", "his", "her", "our", "their", "he", "she", "we",
-  "they", "i", "me", "him", "us", "them", "am", "been", "being",
-  "so", "if", "into", "than", "too", "very", "just", "about", "up", "out",
-  "then", "there", "when", "where", "how", "all", "each", "which", "who",
-  "whom", "what", "these", "those", "some", "any", "both", "few", "more",
-  "most", "other", "such", "only", "own", "same", "also", "after", "before",
-  "over", "under", "again", "further", "once", "here", "why", "because",
-  "until", "while", "above", "below", "between", "through", "during",
+  "a",
+  "an",
+  "the",
+  "and",
+  "or",
+  "but",
+  "in",
+  "on",
+  "at",
+  "to",
+  "for",
+  "of",
+  "with",
+  "by",
+  "from",
+  "is",
+  "it",
+  "as",
+  "be",
+  "this",
+  "that",
+  "are",
+  "was",
+  "were",
+  "has",
+  "have",
+  "had",
+  "not",
+  "no",
+  "do",
+  "does",
+  "did",
+  "will",
+  "would",
+  "shall",
+  "should",
+  "may",
+  "might",
+  "can",
+  "could",
+  "its",
+  "my",
+  "your",
+  "his",
+  "her",
+  "our",
+  "their",
+  "he",
+  "she",
+  "we",
+  "they",
+  "i",
+  "me",
+  "him",
+  "us",
+  "them",
+  "am",
+  "been",
+  "being",
+  "so",
+  "if",
+  "into",
+  "than",
+  "too",
+  "very",
+  "just",
+  "about",
+  "up",
+  "out",
+  "then",
+  "there",
+  "when",
+  "where",
+  "how",
+  "all",
+  "each",
+  "which",
+  "who",
+  "whom",
+  "what",
+  "these",
+  "those",
+  "some",
+  "any",
+  "both",
+  "few",
+  "more",
+  "most",
+  "other",
+  "such",
+  "only",
+  "own",
+  "same",
+  "also",
+  "after",
+  "before",
+  "over",
+  "under",
+  "again",
+  "further",
+  "once",
+  "here",
+  "why",
+  "because",
+  "until",
+  "while",
+  "above",
+  "below",
+  "between",
+  "through",
+  "during",
 ]);
 
 const PUNCT = new Set([
-  ".", ",", "!", "?", ";", ":", "'", '"', "(", ")", "[", "]", "{", "}",
-  "<", ">", "/", "\\", "|", "@", "#", "$", "%", "^", "&", "*", "-", "=",
-  "+", "~", "`", "…", "—", "–",
+  ".",
+  ",",
+  "!",
+  "?",
+  ";",
+  ":",
+  "'",
+  '"',
+  "(",
+  ")",
+  "[",
+  "]",
+  "{",
+  "}",
+  "<",
+  ">",
+  "/",
+  "\\",
+  "|",
+  "@",
+  "#",
+  "$",
+  "%",
+  "^",
+  "&",
+  "*",
+  "-",
+  "=",
+  "+",
+  "~",
+  "`",
+  "…",
+  "—",
+  "–",
 ]);
 
 /** Check if a word is a stop word. */
@@ -114,15 +244,14 @@ export class AnalyzerEngine {
         DEFAULT_REGEX_FLAGS,
         this.supportedLanguages,
       );
+      registry.loadPredefinedRecognizers(this.supportedLanguages);
     }
 
     const regLangs = [...registry.supportedLanguages].sort();
     const engLangs = [...this.supportedLanguages].sort();
     if (JSON.stringify(regLangs) !== JSON.stringify(engLangs)) {
       throw new Error(
-        `Misconfigured engine: language mismatch. ` +
-        `registry: ${JSON.stringify(registry.supportedLanguages)}, ` +
-        `engine: ${JSON.stringify(this.supportedLanguages)}`,
+        `Misconfigured engine: language mismatch. registry: ${JSON.stringify(registry.supportedLanguages)}, engine: ${JSON.stringify(this.supportedLanguages)}`,
       );
     }
     this.registry = registry;
@@ -166,13 +295,12 @@ export class AnalyzerEngine {
 
     // NLP
     const nlpArtifacts =
-      opts.nlpArtifacts ??
-      (await this.nlpEngine.processText(text, language));
+      opts.nlpArtifacts ?? (await this.nlpEngine.processText(text, language));
 
     if (this.logDecisionProcess) {
       this.appTracer.trace(
         opts.correlationId ?? null,
-        "nlp artifacts: " + nlpArtifacts.toJson(),
+        `nlp artifacts: ${nlpArtifacts.toJson()}`,
       );
     }
 
@@ -270,19 +398,29 @@ function enhanceUsingContext(
 
   for (const rec of recognizers) {
     const recResults = rawResults.filter(
-      (r) => r.recognitionMetadata?.[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] === rec.id,
+      (r) =>
+        r.recognitionMetadata?.[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] === rec.id,
     );
     const otherResults = rawResults.filter(
-      (r) => r.recognitionMetadata?.[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] !== rec.id,
+      (r) =>
+        r.recognitionMetadata?.[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] !== rec.id,
     );
     const enhanced = rec.enhanceUsingContext(
-      text, recResults, otherResults, nlpArtifacts, context,
+      text,
+      recResults,
+      otherResults,
+      nlpArtifacts,
+      context,
     );
     results.push(...enhanced);
   }
 
   results = enhancer.enhanceUsingContext(
-    text, results, nlpArtifacts, recognizers, context,
+    text,
+    results,
+    nlpArtifacts,
+    recognizers,
+    context,
   );
   return results;
 }
@@ -328,14 +466,10 @@ function removeAllowList(
 
   if (allowListMatch === "exact") {
     const set = new Set(allowList);
-    return results.filter(
-      (r) => !set.has(text.slice(r.start, r.end)),
-    );
+    return results.filter((r) => !set.has(text.slice(r.start, r.end)));
   }
 
-  throw new Error(
-    `allowListMatch must be 'exact' or 'regex', got '${allowListMatch}'`,
-  );
+  throw new Error(`allowListMatch must be 'exact' or 'regex', got '${allowListMatch}'`);
 }
 
 /** Ensure each result carries recognizer metadata. */
@@ -347,10 +481,20 @@ function addRecognizerIdIfNotExists(
     if (!r.recognitionMetadata) {
       r.recognitionMetadata = {};
     }
-    if (!Object.prototype.hasOwnProperty.call(r.recognitionMetadata, RecognizerResult.RECOGNIZER_IDENTIFIER_KEY)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        r.recognitionMetadata,
+        RecognizerResult.RECOGNIZER_IDENTIFIER_KEY,
+      )
+    ) {
       r.recognitionMetadata[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] = rec.id;
     }
-    if (!Object.prototype.hasOwnProperty.call(r.recognitionMetadata, RecognizerResult.RECOGNIZER_NAME_KEY)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        r.recognitionMetadata,
+        RecognizerResult.RECOGNIZER_NAME_KEY,
+      )
+    ) {
       r.recognitionMetadata[RecognizerResult.RECOGNIZER_NAME_KEY] = rec.name;
     }
   }
@@ -422,12 +566,15 @@ function createFallbackNlpEngine(): SimpleFallbackNlpEngine {
 }
 
 /** Tokenize: split on alphanumeric runs. */
-function tokenizeSimple(text: string): Array<{ token: string; index: number; lemma: string }> {
+function tokenizeSimple(
+  text: string,
+): Array<{ token: string; index: number; lemma: string }> {
   const out: Array<{ token: string; index: number; lemma: string }> = [];
   const re = /[a-zA-Z0-9]+(?:['-][a-zA-Z]+)*/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
+  let m = re.exec(text);
+  while (m !== null) {
     out.push({ token: m[0], index: m.index, lemma: m[0].toLowerCase() });
+    m = re.exec(text);
   }
   return out;
 }

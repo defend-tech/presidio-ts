@@ -1,8 +1,17 @@
-import { describe, it, expect } from "vitest";
+import {
+  AnalysisExplanation,
+  EntityRecognizer,
+  NlpArtifacts,
+  RecognizerResult,
+} from "@defend-tech/presidio-core";
+import { describe, expect, it } from "vitest";
 import { ContextAwareEnhancer } from "../src/context/context-aware-enhancer";
 import { LemmaContextAwareEnhancer } from "../src/context/lemma-context-aware-enhancer";
-import { isStopWord, isPunctuation, findSupportiveWordInContext } from "../src/context/lemma-context-aware-enhancer";
-import { RecognizerResult, NlpArtifacts, EntityRecognizer, AnalysisExplanation } from "@presidio/core";
+import {
+  findSupportiveWordInContext,
+  isPunctuation,
+  isStopWord,
+} from "../src/context/lemma-context-aware-enhancer";
 
 // Minimal test recognizer with context words
 class TestRecognizer extends EntityRecognizer {
@@ -80,11 +89,7 @@ describe("findSupportiveWordInContext", () => {
   });
 
   it("returns empty for no whole_word match", () => {
-    const result = findSupportiveWordInContext(
-      ["creditcard"],
-      ["card"],
-      "whole_word",
-    );
+    const result = findSupportiveWordInContext(["creditcard"], ["card"], "whole_word");
     expect(result).toBe("");
   });
 
@@ -123,9 +128,10 @@ describe("LemmaContextAwareEnhancer.enhanceUsingContext", () => {
     // Build proper token data
     const tokenData: Array<[string, number]> = [];
     const re = /[a-zA-Z]+/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
+    let m = re.exec(text);
+    while (m !== null) {
       tokenData.push([m[0], m.index]);
+      m = re.exec(text);
     }
     const nlpArtifacts = new NlpArtifacts(
       [],
@@ -136,12 +142,9 @@ describe("LemmaContextAwareEnhancer.enhanceUsingContext", () => {
       "en",
     );
 
-    const enhanced = enhancer.enhanceUsingContext(
-      text,
-      [result],
-      nlpArtifacts,
-      [recognizer],
-    );
+    const enhanced = enhancer.enhanceUsingContext(text, [result], nlpArtifacts, [
+      recognizer,
+    ]);
 
     expect(enhanced.length).toBe(1);
     expect(enhanced[0].score).toBeGreaterThan(result.score);
@@ -168,9 +171,10 @@ describe("LemmaContextAwareEnhancer.enhanceUsingContext", () => {
 
     const tokenData: Array<[string, number]> = [];
     const re = /[a-zA-Z]+/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
+    let m = re.exec(text);
+    while (m !== null) {
       tokenData.push([m[0], m.index]);
+      m = re.exec(text);
     }
     const nlpArtifacts = new NlpArtifacts(
       [],
@@ -182,7 +186,9 @@ describe("LemmaContextAwareEnhancer.enhanceUsingContext", () => {
     );
 
     const originalScore = result.score;
-    const enhanced = enhancer.enhanceUsingContext(text, [result], nlpArtifacts, [recognizer]);
+    const enhanced = enhancer.enhanceUsingContext(text, [result], nlpArtifacts, [
+      recognizer,
+    ]);
 
     expect(enhanced.length).toBe(1);
     expect(enhanced[0].score).toBe(originalScore);

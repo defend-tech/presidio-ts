@@ -1,5 +1,5 @@
 /**
- * @presidio/analyzer — Presidio PII analyzer engine and recognizers.
+ * @defend-tech/presidio-analyzer — Presidio PII analyzer engine and recognizers.
  *
  * TypeScript port of the Python `presidio_analyzer` package.
  */
@@ -17,9 +17,21 @@ export { LemmaContextAwareEnhancer } from "./context/index.js";
 
 // ——— Engines ———
 export { AnalyzerEngine } from "./engine/index.js";
-export type { AnalyzerEngineOptions, AnalyzeOptions, AllowListMatch } from "./engine/index.js";
+export type {
+  AnalyzerEngineOptions,
+  AnalyzeOptions,
+  AllowListMatch,
+} from "./engine/index.js";
 export { BatchAnalyzerEngine, DictAnalyzerResult } from "./engine/index.js";
 export type { DictValue, DictNestedResults } from "./engine/index.js";
+
+// --- Bounded-text chunkers ---
+export {
+  BaseTextChunker,
+  CharacterBasedTextChunker,
+  TextChunkerProvider,
+} from "./chunkers/text-chunker.js";
+export type { TextChunk, TextChunkerConfig } from "./chunkers/text-chunker.js";
 
 // ——— Entities ———
 export { AnalyzerRequest } from "./entities/index.js";
@@ -28,3 +40,6 @@ export { AnalyzerRequestSchema, AdHocRecognizerSchema } from "./entities/index.j
 
 // ——— Generic recognizers ———
 export * from "./recognizers/generic/index.js";
+
+// Country recognizers are available for opt-in imports and default loading.
+export * from "./recognizers/country/index.js";

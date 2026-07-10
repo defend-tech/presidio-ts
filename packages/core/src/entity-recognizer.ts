@@ -1,5 +1,5 @@
 import type { NlpArtifacts } from "./nlp-artifacts.js";
-import { RecognizerResult } from "./recognizer-result.js";
+import type { RecognizerResult } from "./recognizer-result.js";
 
 /**
  * A class representing an abstract PII entity recognizer.
@@ -19,15 +19,15 @@ export abstract class EntityRecognizer {
   protected _id: string;
   supportedLanguage: string;
   version: string;
-  isLoaded: boolean = false;
+  isLoaded = false;
   context: string[];
   protected _countryCode: string | null;
 
   constructor(
     supportedEntities: string[],
     name: string | null = null,
-    supportedLanguage: string = "en",
-    version: string = "0.0.1",
+    supportedLanguage = "en",
+    version = "0.0.1",
     context: string[] | null = null,
     countryCode: string | null = null,
   ) {
@@ -81,7 +81,7 @@ export abstract class EntityRecognizer {
     if (normalizedClass !== null && normalizedPassed !== normalizedClass) {
       throw new Error(
         `country_code="${passed}" conflicts with class-level ${
-          (this.constructor as typeof EntityRecognizer).name
+          (EntityRecognizer.constructor as typeof EntityRecognizer).name
         }.COUNTRY_CODE="${classCode}". The class attribute is the canonical declaration.`,
       );
     }
@@ -149,7 +149,9 @@ export abstract class EntityRecognizer {
     entityRecognizerDict: Record<string, any>,
   ): EntityRecognizer {
     // This is meant to be overridden by subclasses
-    const cls = this as unknown as new (...args: unknown[]) => EntityRecognizer;
+    const cls = EntityRecognizer as unknown as new (
+      ...args: unknown[]
+    ) => EntityRecognizer;
     return new cls(entityRecognizerDict);
   }
 
@@ -171,7 +173,10 @@ export abstract class EntityRecognizer {
 
     // Sort by: higher score first, then earlier start, then shorter span
     unique.sort(
-      (a, b) => -b.score - -a.score || a.start - b.start || -(b.end - b.start) - -(a.end - a.start),
+      (a, b) =>
+        -b.score - -a.score ||
+        a.start - b.start ||
+        -(b.end - b.start) - -(a.end - a.start),
     );
 
     const filtered: RecognizerResult[] = [];

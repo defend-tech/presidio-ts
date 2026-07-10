@@ -1,7 +1,7 @@
 import { AESCipher } from "../crypto/aes-cipher.js";
 import { Encrypt } from "./encrypt.js";
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import { Operator } from "./operator.js";
 
 /** Decrypts text from a reversible encrypted form. */
 export class Decrypt extends Operator {

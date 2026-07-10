@@ -2,7 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "../..",
+    "paths": {
+      "@defend-tech/presidio-analyzer": ["../analyzer/src/index.ts"],
+      "@defend-tech/presidio-anonymizer": ["../anonymizer/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

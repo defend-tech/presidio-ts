@@ -1,5 +1,5 @@
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import { Operator } from "./operator.js";
 
 export type CustomOperatorFunction = (text: string) => string;
 

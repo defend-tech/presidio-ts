@@ -1,20 +1,23 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /** ES_PASSPORT recognizer for ES region. */
 export class EsPassportRecognizer extends PatternRecognizer {
   static override readonly COUNTRY_CODE = "es";
 
-  static readonly PATTERNS = [
+  static readonly PATTERNS = [new Pattern("ES_PASSPORT", "\\b[A-Z]{3}[0-9]{6}\\b", 0.05)];
 
+  static readonly CONTEXT = [
+    "pasaporte",
+    "passport",
+    "número de pasaporte",
+    "passport number",
   ];
-
-  static readonly CONTEXT = ["pasaporte", "passport", "número de pasaporte", "passport number"];
 
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supported_language: string = "en",
-    supported_entity: string = "ES_PASSPORT",
+    supported_language = "en",
+    supported_entity = "ES_PASSPORT",
     name: string | null = null,
   ) {
     super(
@@ -26,5 +29,4 @@ export class EsPassportRecognizer extends PatternRecognizer {
       context ?? EsPassportRecognizer.CONTEXT,
     );
   }
-
 }

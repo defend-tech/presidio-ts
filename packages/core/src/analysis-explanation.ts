@@ -8,8 +8,8 @@ export class AnalysisExplanation {
   originalScore: number;
   score: number;
   textualExplanation: string | null;
-  scoreContextImprovement: number = 0;
-  supportiveContextWord: string = "";
+  scoreContextImprovement = 0;
+  supportiveContextWord = "";
   validationResult: boolean | null;
   regexFlags: string | undefined;
 

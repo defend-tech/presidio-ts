@@ -1,4 +1,4 @@
-import type { RecognizerResult } from "@presidio/core";
+import type { RecognizerResult } from "@defend-tech/presidio-core";
 import { AnalyzerEngine } from "./analyzer-engine.js";
 import type { AnalyzeOptions } from "./analyzer-engine.js";
 
@@ -30,8 +30,8 @@ export class BatchAnalyzerEngine {
   public async analyzeIterator(
     texts: Iterable<string | number | boolean>,
     language: string,
-    batchSize: number = 1,
-    nProcess: number = 1,
+    batchSize = 1,
+    nProcess = 1,
     opts: AnalyzeOptions = {},
   ): Promise<RecognizerResult[][]> {
     const validated: (string | number | boolean)[] = [...texts];
@@ -88,8 +88,8 @@ export class BatchAnalyzerEngine {
     inputDict: Record<string, unknown>,
     language: string,
     keysToSkip: string[] = [],
-    batchSize: number = 1,
-    nProcess: number = 1,
+    batchSize = 1,
+    nProcess = 1,
     opts: AnalyzeOptions = {},
   ): AsyncGenerator<DictAnalyzerResult, void, unknown> {
     const context: string[] = opts.context ?? [];
@@ -123,17 +123,10 @@ export class BatchAnalyzerEngine {
 /* ------------------------------------------------------------------ */
 
 /** Primitive or structured value in a dictionary. */
-export type DictValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+export type DictValue = string | number | boolean | null | undefined;
 
 /** Nested result types for dictionary entries. */
-export type DictNestedResults =
-  | RecognizerResult[]
-  | RecognizerResult[][];
+export type DictNestedResults = RecognizerResult[] | RecognizerResult[][];
 
 /**
  * Data class for dictionary analysis output.
@@ -145,11 +138,7 @@ export class DictAnalyzerResult {
   public value: DictValue;
   public recognizerResults: DictNestedResults;
 
-  constructor(
-    key: string,
-    value: DictValue,
-    recognizerResults: DictNestedResults,
-  ) {
+  constructor(key: string, value: DictValue, recognizerResults: DictNestedResults) {
     this.key = key;
     this.value = value;
     this.recognizerResults = recognizerResults;
@@ -175,7 +164,11 @@ async function analyzeDictEntry(
   opts: AnalyzeOptions,
 ): Promise<DictAnalyzerResult> {
   // Primitive
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
     const results = await engine.analyzerEngine.analyze(String(value), language, {
       ...opts,
       context: specificContext,
@@ -206,10 +199,16 @@ async function analyzeDictEntry(
 
   // Array
   if (Array.isArray(value)) {
-    const itemResults = await engine.analyzeIterator(value, language, batchSize, nProcess, {
-      ...opts,
-      context: specificContext,
-    });
+    const itemResults = await engine.analyzeIterator(
+      value,
+      language,
+      batchSize,
+      nProcess,
+      {
+        ...opts,
+        context: specificContext,
+      },
+    );
     return new DictAnalyzerResult(key, null, itemResults);
   }
 

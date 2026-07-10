@@ -1,6 +1,6 @@
-import type { AnalyzeOptions } from "@presidio/analyzer";
+import type { AnalyzeOptions } from "@defend-tech/presidio-analyzer";
 import type { ImageConfig, ImagePixel, ImageSource } from "../entities.js";
-import { RecognizerResult } from "../entities.js";
+import type { RecognizerResult } from "../entities.js";
 import { ImageProcessingEngine } from "../processing/image-processing-engine.js";
 import { ImageAnalyzerEngine } from "./image-analyzer-engine.js";
 
@@ -21,11 +21,17 @@ export class ImageRedactorEngine {
     return { image: canvas, bboxes };
   }
 
-  async redact(image: ImageSource, config: ImageConfig = {}, options: AnalyzeOptions = {}): Promise<HTMLCanvasElement | OffscreenCanvas> {
+  async redact(
+    image: ImageSource,
+    config: ImageConfig = {},
+    options: AnalyzeOptions = {},
+  ): Promise<HTMLCanvasElement | OffscreenCanvas> {
     return (await this.redactAndReturnBboxes(image, config, options)).image;
   }
 }
 
 function fill(value: string | ImagePixel): string {
-  return typeof value === "string" ? value : `rgba(${value.r}, ${value.g}, ${value.b}, ${value.a ?? 255})`;
+  return typeof value === "string"
+    ? value
+    : `rgba(${value.r}, ${value.g}, ${value.b}, ${value.a ?? 255})`;
 }

@@ -1,4 +1,4 @@
-import { AnalyzerEngine } from "@presidio/analyzer";
+import { AnalyzerEngine } from "@defend-tech/presidio-analyzer";
 import type {
   ColumnAnalysisResult,
   ColumnConfig,
@@ -28,18 +28,27 @@ export class AnalysisBuilder {
       const entityCounts: Record<string, number> = {};
       let sampled = 0;
 
-      for (let rowIndex = 0; rowIndex < rows.length && sampled < sampleSize; rowIndex += 1) {
+      for (
+        let rowIndex = 0;
+        rowIndex < rows.length && sampled < sampleSize;
+        rowIndex += 1
+      ) {
         const value = rows[rowIndex][column.name];
         if (value === null || value === undefined || value === "") continue;
 
         sampled += 1;
-        const results = await analyzer.analyze(String(value), column.language ?? config.language ?? "en", {
-          ...column.analyzerOptions,
-          entities: column.entities,
-          context: column.context,
-        });
+        const results = await analyzer.analyze(
+          String(value),
+          column.language ?? config.language ?? "en",
+          {
+            ...column.analyzerOptions,
+            entities: column.entities,
+            context: column.context,
+          },
+        );
         for (const analysis of results) {
-          entityCounts[analysis.entityType] = (entityCounts[analysis.entityType] ?? 0) + 1;
+          entityCounts[analysis.entityType] =
+            (entityCounts[analysis.entityType] ?? 0) + 1;
         }
         cells.push({ rowIndex, value, results });
       }

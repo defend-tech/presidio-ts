@@ -24,10 +24,21 @@ export class Pattern {
 
   static #validateRegex(pattern: string): void {
     try {
-      new RegExp(pattern);
+      const { source, flags } = Pattern.normalizePythonRegex(pattern);
+      new RegExp(source, flags);
     } catch (e) {
       throw new Error(`Invalid regex pattern: ${(e as Error).message}`);
     }
+  }
+
+  /** Translate the Python inline flags used by retained recognizer patterns. */
+  static normalizePythonRegex(pattern: string): { source: string; flags: string } {
+    const flags = new Set<string>();
+    const source = pattern.replace(/\(\?([ims]+)\)/g, (_match, inlineFlags: string) => {
+      for (const flag of inlineFlags) flags.add(flag);
+      return "";
+    });
+    return { source, flags: [...flags].join("") };
   }
 
   static #validateScore(score: number): void {

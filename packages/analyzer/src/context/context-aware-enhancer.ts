@@ -1,4 +1,8 @@
-import type { EntityRecognizer, NlpArtifacts, RecognizerResult } from "@presidio/core";
+import type {
+  EntityRecognizer,
+  NlpArtifacts,
+  RecognizerResult,
+} from "@defend-tech/presidio-core";
 
 /**
  * Abstract base class for context-aware enhancers.

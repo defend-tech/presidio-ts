@@ -1,4 +1,4 @@
-import type { NlpArtifacts } from "@presidio/core";
+import type { NlpArtifacts } from "@defend-tech/presidio-core";
 
 /**
  * NlpEngine is an abstraction layer over the NLP module.
@@ -31,10 +31,7 @@ export abstract class NlpEngine {
    * @param language - The ISO code of the text language (e.g. `"en"`).
    * @returns NlpArtifacts containing entities, tokens, lemmas, keywords, etc.
    */
-  public abstract processText(
-    text: string,
-    language: string,
-  ): Promise<NlpArtifacts>;
+  public abstract processText(text: string, language: string): Promise<NlpArtifacts>;
 
   /**
    * Execute the NLP pipeline on a batch of texts.

@@ -1,9 +1,9 @@
 import {
-  type EntityRecognizer,
-  RecognizerResult,
-  type NlpArtifacts,
   AnalysisExplanation,
-} from "@presidio/core";
+  type EntityRecognizer,
+  type NlpArtifacts,
+  RecognizerResult,
+} from "@defend-tech/presidio-core";
 import { ContextAwareEnhancer } from "./context-aware-enhancer.js";
 
 /**
@@ -13,24 +13,154 @@ import { ContextAwareEnhancer } from "./context-aware-enhancer.js";
  * Here we ship a minimal built-in set covering common English stop words.
  */
 const STOP_WORDS_EN = new Set([
-  "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-  "of", "with", "by", "from", "is", "it", "as", "be", "this", "that",
-  "are", "was", "were", "has", "have", "had", "not", "no", "do", "does",
-  "did", "will", "would", "shall", "should", "may", "might", "can", "could",
-  "its", "my", "your", "his", "her", "our", "their", "he", "she", "we",
-  "they", "i", "me", "him", "us", "them", "am", "been", "being",
-  "so", "if", "into", "than", "too", "very", "just", "about", "up", "out",
-  "then", "there", "when", "where", "how", "all", "each", "which", "who",
-  "whom", "what", "these", "those", "some", "any", "both", "few", "more",
-  "most", "other", "such", "only", "own", "same", "also", "after", "before",
-  "over", "under", "again", "further", "once", "here", "why", "because",
-  "until", "while", "above", "below", "between", "through", "during",
+  "a",
+  "an",
+  "the",
+  "and",
+  "or",
+  "but",
+  "in",
+  "on",
+  "at",
+  "to",
+  "for",
+  "of",
+  "with",
+  "by",
+  "from",
+  "is",
+  "it",
+  "as",
+  "be",
+  "this",
+  "that",
+  "are",
+  "was",
+  "were",
+  "has",
+  "have",
+  "had",
+  "not",
+  "no",
+  "do",
+  "does",
+  "did",
+  "will",
+  "would",
+  "shall",
+  "should",
+  "may",
+  "might",
+  "can",
+  "could",
+  "its",
+  "my",
+  "your",
+  "his",
+  "her",
+  "our",
+  "their",
+  "he",
+  "she",
+  "we",
+  "they",
+  "i",
+  "me",
+  "him",
+  "us",
+  "them",
+  "am",
+  "been",
+  "being",
+  "so",
+  "if",
+  "into",
+  "than",
+  "too",
+  "very",
+  "just",
+  "about",
+  "up",
+  "out",
+  "then",
+  "there",
+  "when",
+  "where",
+  "how",
+  "all",
+  "each",
+  "which",
+  "who",
+  "whom",
+  "what",
+  "these",
+  "those",
+  "some",
+  "any",
+  "both",
+  "few",
+  "more",
+  "most",
+  "other",
+  "such",
+  "only",
+  "own",
+  "same",
+  "also",
+  "after",
+  "before",
+  "over",
+  "under",
+  "again",
+  "further",
+  "once",
+  "here",
+  "why",
+  "because",
+  "until",
+  "while",
+  "above",
+  "below",
+  "between",
+  "through",
+  "during",
 ]);
 
 const PUNCTUATION = new Set([
-  ".", ",", "!", "?", ";", ":", "'", '"', "(", ")", "[", "]", "{", "}",
-  "<", ">", "/", "\\", "|", "@", "#", "$", "%", "^", "&", "*", "-", "=",
-  "+", "~", "`", "\u2026", "\u2014", "\u2013",
+  ".",
+  ",",
+  "!",
+  "?",
+  ";",
+  ":",
+  "'",
+  '"',
+  "(",
+  ")",
+  "[",
+  "]",
+  "{",
+  "}",
+  "<",
+  ">",
+  "/",
+  "\\",
+  "|",
+  "@",
+  "#",
+  "$",
+  "%",
+  "^",
+  "&",
+  "*",
+  "-",
+  "=",
+  "+",
+  "~",
+  "`",
+  "\u2026",
+  "\u2014",
+  "\u2013",
 ]);
 
 /** Check if a word is a stop word. */
@@ -53,13 +183,14 @@ function tokenizeText(
 ): Array<{ token: string; index: number; lemma: string }> {
   const tokens: Array<{ token: string; index: number; lemma: string }> = [];
   const regex = /[a-zA-Z0-9]+/g;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(text)) !== null) {
+  let match = regex.exec(text);
+  while (match !== null) {
     tokens.push({
       token: match[0],
       index: match.index,
       lemma: match[0].toLowerCase(),
     });
+    match = regex.exec(text);
   }
   return tokens;
 }
@@ -84,10 +215,10 @@ export class LemmaContextAwareEnhancer extends ContextAwareEnhancer {
   public contextMatchingMode: "substring" | "whole_word";
 
   constructor(
-    contextSimilarityFactor: number = 0.35,
-    minScoreWithContextSimilarity: number = 0.4,
-    contextPrefixCount: number = 5,
-    contextSuffixCount: number = 0,
+    contextSimilarityFactor = 0.35,
+    minScoreWithContextSimilarity = 0.4,
+    contextPrefixCount = 5,
+    contextSuffixCount = 0,
     contextMatchingMode: "substring" | "whole_word" = "substring",
   ) {
     super(
@@ -98,8 +229,7 @@ export class LemmaContextAwareEnhancer extends ContextAwareEnhancer {
     );
     if (contextMatchingMode !== "whole_word" && contextMatchingMode !== "substring") {
       throw new Error(
-        `contextMatchingMode must be one of: 'whole_word', 'substring'. ` +
-          `Got: ${contextMatchingMode}`,
+        `contextMatchingMode must be one of: 'whole_word', 'substring'. Got: ${contextMatchingMode}`,
       );
     }
     this.contextMatchingMode = contextMatchingMode;
@@ -138,7 +268,9 @@ export class LemmaContextAwareEnhancer extends ContextAwareEnhancer {
         result.recognitionMetadata &&
         RecognizerResult.RECOGNIZER_IDENTIFIER_KEY in result.recognitionMetadata
       ) {
-        const recId = result.recognitionMetadata[RecognizerResult.RECOGNIZER_IDENTIFIER_KEY] as string;
+        const recId = result.recognitionMetadata[
+          RecognizerResult.RECOGNIZER_IDENTIFIER_KEY
+        ] as string;
         recognizer = recognizersDict.get(recId);
       }
 
@@ -148,14 +280,19 @@ export class LemmaContextAwareEnhancer extends ContextAwareEnhancer {
       if (!recognizer.context || recognizer.context.length === 0) continue;
 
       // Skip if already boosted by recognizer-level enhancement
-      if (result.recognitionMetadata?.[RecognizerResult.IS_SCORE_ENHANCED_BY_CONTEXT_KEY]) continue;
+      if (result.recognitionMetadata?.[RecognizerResult.IS_SCORE_ENHANCED_BY_CONTEXT_KEY])
+        continue;
 
       const matchedWord = text.slice(result.start, result.end);
 
       // Extract surrounding words
       const surroundingWords = extractSurroundingWords(
-        tokens, lemmas, keywords, tokenIndices,
-        matchedWord, result.start,
+        tokens,
+        lemmas,
+        keywords,
+        tokenIndices,
+        matchedWord,
+        result.start,
         this.contextPrefixCount,
         this.contextSuffixCount,
       );
@@ -198,18 +335,20 @@ function deepCopyRecognizerResult(r: RecognizerResult): RecognizerResult {
     r.start,
     r.end,
     r.score,
-    r.analysisExplanation ? Object.assign(
-      new AnalysisExplanation(
-        r.analysisExplanation.recognizer,
-        r.analysisExplanation.originalScore,
-        r.analysisExplanation.patternName,
-        r.analysisExplanation.pattern,
-        r.analysisExplanation.validationResult,
-        r.analysisExplanation.textualExplanation,
-        r.analysisExplanation.regexFlags,
-      ),
-      r.analysisExplanation,
-    ) : null,
+    r.analysisExplanation
+      ? Object.assign(
+          new AnalysisExplanation(
+            r.analysisExplanation.recognizer,
+            r.analysisExplanation.originalScore,
+            r.analysisExplanation.patternName,
+            r.analysisExplanation.pattern,
+            r.analysisExplanation.validationResult,
+            r.analysisExplanation.textualExplanation,
+            r.analysisExplanation.regexFlags,
+          ),
+          r.analysisExplanation,
+        )
+      : null,
     r.recognitionMetadata ? { ...r.recognitionMetadata } : null,
   );
   return copy;
@@ -239,9 +378,9 @@ function buildTokenData(
     tokens: allTokens.map((t) => t.token),
     lemmas: allTokens.map((t) => t.lemma),
     tokenIndices: allTokens.map((t) => t.index),
-    keywords: allTokens.filter(
-      (t) => !isStopWord(t.token) && !isPunctuation(t.token),
-    ).map((t) => t.lemma),
+    keywords: allTokens
+      .filter((t) => !isStopWord(t.token) && !isPunctuation(t.token))
+      .map((t) => t.lemma),
   };
 }
 
@@ -279,7 +418,7 @@ function findIndexOfMatchToken(
   }
   // Fallback: closest token
   let best = 0;
-  let bestDist = Infinity;
+  let bestDist = Number.POSITIVE_INFINITY;
   for (let i = 0; i < tokenIndices.length; i++) {
     const d = Math.abs(tokenIndices[i] - start);
     if (d < bestDist) {
@@ -321,7 +460,12 @@ export function findSupportiveWordInContext(
   recognizerContextList: string[],
   matchingMode: "substring" | "whole_word" = "substring",
 ): string {
-  if (!contextList || !recognizerContextList || contextList.length === 0 || recognizerContextList.length === 0) {
+  if (
+    !contextList ||
+    !recognizerContextList ||
+    contextList.length === 0 ||
+    recognizerContextList.length === 0
+  ) {
     return "";
   }
   for (const predefined of recognizerContextList) {

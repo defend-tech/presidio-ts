@@ -1,10 +1,40 @@
-import { EntityRecognizer, Pattern, PatternRecognizer } from "@presidio/core";
+import { EntityRecognizer, Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 import type { NlpEngine } from "../nlp/nlp-engine.js";
+import * as CountryRecognizers from "../recognizers/country/index.js";
+import {
+  CreditCardRecognizer,
+  CryptoRecognizer,
+  DateRecognizer,
+  EmailRecognizer,
+  IbanRecognizer,
+  IpRecognizer,
+  MacAddressRecognizer,
+  PhoneRecognizer,
+  UrlRecognizer,
+} from "../recognizers/generic/index.js";
 
 // Default regex flags: dotall, multiline, ignoreCase.
 // In the Python version this is `re.DOTALL | re.MULTILINE | re.IGNORECASE`.
 // The TypeScript PatternRecognizer uses string flags, so we map to `"gmsi"`.
 const DEFAULT_GLOBAL_REGEX_FLAGS = "gmsi";
+
+type RecognizerConstructor = new () => EntityRecognizer;
+
+const DEFAULT_RECOGNIZERS: RecognizerConstructor[] = [
+  CreditCardRecognizer,
+  CryptoRecognizer,
+  DateRecognizer,
+  EmailRecognizer,
+  IbanRecognizer,
+  IpRecognizer,
+  MacAddressRecognizer,
+  PhoneRecognizer,
+  UrlRecognizer,
+];
+
+const COUNTRY_RECOGNIZERS = (Object.values(CountryRecognizers) as unknown[]).filter(
+  (candidate): candidate is RecognizerConstructor => typeof candidate === "function",
+);
 
 /**
  * Detect, register and hold all recognizers to be used by the analyzer.
@@ -66,10 +96,7 @@ export class RecognizerRegistry {
    * @param recognizerName - Name of recognizer to remove.
    * @param language - Optional language filter. If omitted, all languages are removed.
    */
-  public removeRecognizer(
-    recognizerName: string,
-    language?: string,
-  ): void {
+  public removeRecognizer(recognizerName: string, language?: string): void {
     const before = this.recognizers.length;
     if (!language) {
       this.recognizers = this.recognizers.filter((rec) => rec.name !== recognizerName);
@@ -105,9 +132,7 @@ export class RecognizerRegistry {
    * });
    * ```
    */
-  public addPatternRecognizerFromDict(
-    recognizerDict: Record<string, unknown>,
-  ): void {
+  public addPatternRecognizerFromDict(recognizerDict: Record<string, unknown>): void {
     const recognizer = this.#createPatternRecognizerFromDict(recognizerDict);
     this.addRecognizer(recognizer);
   }
@@ -131,7 +156,7 @@ export class RecognizerRegistry {
   public getRecognizers(
     language: string,
     entities: string[] | null = null,
-    allFields: boolean = false,
+    allFields = false,
     adHocRecognizers?: EntityRecognizer[],
   ): EntityRecognizer[] {
     if (!language) {
@@ -149,9 +174,7 @@ export class RecognizerRegistry {
     let toReturn: EntityRecognizer[];
 
     if (allFields) {
-      toReturn = allPossible.filter(
-        (rec) => rec.supportedLanguage === language,
-      );
+      toReturn = allPossible.filter((rec) => rec.supportedLanguage === language);
     } else {
       // entities is guaranteed non-null here because we throw above when
       // both entities === null and allFields === false
@@ -160,8 +183,7 @@ export class RecognizerRegistry {
       for (const entity of safeEntities) {
         const subset = allPossible.filter(
           (rec) =>
-            rec.supportedEntities.includes(entity) &&
-            rec.supportedLanguage === language,
+            rec.supportedEntities.includes(entity) && rec.supportedLanguage === language,
         );
 
         if (subset.length === 0) {
@@ -178,14 +200,10 @@ export class RecognizerRegistry {
       toReturn = [...matching];
     }
 
-    console.debug(
-      `[RecognizerRegistry] Returning ${toReturn.length} recognizers`,
-    );
+    console.debug(`[RecognizerRegistry] Returning ${toReturn.length} recognizers`);
 
     if (toReturn.length === 0) {
-      throw new Error(
-        "No matching recognizers were found to serve the request.",
-      );
+      throw new Error("No matching recognizers were found to serve the request.");
     }
 
     return toReturn;
@@ -248,9 +266,8 @@ export class RecognizerRegistry {
   /**
    * Load predefined (built-in) recognizers into the registry.
    *
-   * This is a simplified browser-friendly version that does **not**
-   * load YAML configurations or Python-based recognizers. Subclasses
-   * may override to add custom loading logic.
+   * This browser-safe loader deterministically instantiates the tracked
+   * rule-based recognizers. It does not load YAML or ML/provider recognizers.
    *
    * @param languages - Optional languages to load recognizers for.
    * @param nlpEngine - Optional NLP engine used to add NLP-based recognizers.
@@ -265,16 +282,55 @@ export class RecognizerRegistry {
     languages: string[] | null = null,
     nlpEngine?: NlpEngine,
   ): void {
-    // In a browser environment the caller is responsible for registering
-    // recognizers explicitly via `addRecognizer` or providing a custom
-    // implementation that bundles recognizers at build time.
-
     if (languages) {
       this.supportedLanguages = [...languages];
     }
 
+    const selectedLanguages = new Set(languages ?? this.supportedLanguages);
+    const existing = new Set(
+      this.recognizers.map((recognizer) => recognizer.constructor),
+    );
+    for (const Recognizer of DEFAULT_RECOGNIZERS) {
+      try {
+        const recognizer = new Recognizer();
+        if (
+          selectedLanguages.has(recognizer.supportedLanguage) &&
+          !existing.has(Recognizer)
+        ) {
+          this.recognizers.push(recognizer);
+          existing.add(Recognizer);
+        }
+      } catch {
+        // Incomplete generated country recognizers are intentionally excluded
+        // until they have executable patterns and validation coverage.
+      }
+    }
+
     if (nlpEngine) {
       this.addNlpRecognizer(nlpEngine);
+    }
+  }
+
+  /**
+   * Add country-specific rule recognizers explicitly. They are intentionally
+   * excluded from the default registry to avoid treating ordinary numbers as
+   * identifiers for every supported jurisdiction.
+   */
+  public loadCountryRecognizers(countryCodes?: string[]): void {
+    const selected = countryCodes?.map((code) => code.toLowerCase());
+    const existing = new Set(
+      this.recognizers.map((recognizer) => recognizer.constructor),
+    );
+    for (const Recognizer of COUNTRY_RECOGNIZERS) {
+      const recognizer = new Recognizer();
+      const country = recognizer.countryCode()?.toLowerCase();
+      if (
+        (!selected || (country && selected.includes(country))) &&
+        !existing.has(Recognizer)
+      ) {
+        this.recognizers.push(recognizer);
+        existing.add(Recognizer);
+      }
     }
   }
 
@@ -337,9 +393,7 @@ export class RecognizerRegistry {
    *
    * Supports both Python-style snake_case keys and JavaScript camelCase keys.
    */
-  #createPatternRecognizerFromDict(
-    dict: Record<string, unknown>,
-  ): PatternRecognizer {
+  #createPatternRecognizerFromDict(dict: Record<string, unknown>): PatternRecognizer {
     const copy: Record<string, unknown> = { ...dict };
 
     // Normalize supported_entities (plural) -> supported_entity (singular)
@@ -355,22 +409,17 @@ export class RecognizerRegistry {
 
     const entity: string =
       supportedEntity ??
-      (supportedEntities?.[0] ??
-        (copy.supportedEntity as string) ??
-        (copy.supported_entity as string));
+      supportedEntities?.[0] ??
+      (copy.supportedEntity as string) ??
+      (copy.supported_entity as string);
     const name = (copy.name as string) ?? null;
     const supportedLanguage =
-      (copy.supportedLanguage as string) ??
-      (copy.supported_language as string) ??
-      "en";
+      (copy.supportedLanguage as string) ?? (copy.supported_language as string) ?? "en";
     const context = (copy.context as string[]) ?? null;
-    const denyListScore = (copy.denyListScore as number) ??
-      (copy.deny_list_score as number) ??
-      1.0;
+    const denyListScore =
+      (copy.denyListScore as number) ?? (copy.deny_list_score as number) ?? 1.0;
     const globalRegexFlags =
-      (copy.globalRegexFlags as string) ??
-      (copy.global_regex_flags as string) ??
-      "gmsi";
+      (copy.globalRegexFlags as string) ?? (copy.global_regex_flags as string) ?? "gmsi";
     const version = (copy.version as string) ?? "0.0.1";
     const countryCode =
       (copy.countryCode as string) ?? (copy.country_code as string) ?? null;
@@ -379,7 +428,9 @@ export class RecognizerRegistry {
     let patterns: Pattern[] | null = null;
     if (copy.patterns) {
       const rawPatterns = copy.patterns as Array<Record<string, unknown>>;
-      patterns = rawPatterns.map((pat) => Pattern.fromDict(pat as { name: string; regex: string; score: number }));
+      patterns = rawPatterns.map((pat) =>
+        Pattern.fromDict(pat as { name: string; regex: string; score: number }),
+      );
     }
 
     // Deny list — supports both snake_case and camelCase

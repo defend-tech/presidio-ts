@@ -1,4 +1,8 @@
-import { EntityRecognizer, NlpArtifacts, RecognizerResult } from "@presidio/core";
+import {
+  EntityRecognizer,
+  type NlpArtifacts,
+  RecognizerResult,
+} from "@defend-tech/presidio-core";
 
 // Concrete subclass for testing the abstract EntityRecognizer
 class TestRecognizer extends EntityRecognizer {
@@ -6,7 +10,11 @@ class TestRecognizer extends EntityRecognizer {
     // No-op
   }
 
-  analyze(_text: string, _entities: string[], _nlpArtifacts: NlpArtifacts | null): RecognizerResult[] {
+  analyze(
+    _text: string,
+    _entities: string[],
+    _nlpArtifacts: NlpArtifacts | null,
+  ): RecognizerResult[] {
     return [];
   }
 }
@@ -49,7 +57,10 @@ describe("EntityRecognizer", () => {
     });
 
     test("sets context array", () => {
-      const rec = new TestRecognizer(["SSN"], null, "en", "0.0.1", ["ssn", "social security"]);
+      const rec = new TestRecognizer(["SSN"], null, "en", "0.0.1", [
+        "ssn",
+        "social security",
+      ]);
       expect(rec.context).toEqual(["ssn", "social security"]);
     });
 
@@ -93,12 +104,7 @@ describe("EntityRecognizer", () => {
     test("returns results unchanged by default", () => {
       const rec = new TestRecognizer(["PERSON"]);
       const results = [new RecognizerResult("PERSON", 0, 5, 0.8)];
-      const enhanced = rec.enhanceUsingContext(
-        "test",
-        results,
-        [],
-        null,
-      );
+      const enhanced = rec.enhanceUsingContext("test", results, [], null);
       expect(enhanced).toBe(results);
     });
   });
@@ -217,7 +223,9 @@ describe("EntityRecognizer", () => {
   describe("country code validation via constructor", () => {
     test("non-string country code throws TypeError", () => {
       // @ts-expect-error - intentionally passing invalid type
-      expect(() => new TestRecognizer(["A"], null, "en", "0.0.1", null, 123)).toThrow(TypeError);
+      expect(() => new TestRecognizer(["A"], null, "en", "0.0.1", null, 123)).toThrow(
+        TypeError,
+      );
     });
 
     test("empty string country code throws Error", () => {

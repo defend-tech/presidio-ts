@@ -1,4 +1,4 @@
-import { AnalysisExplanation } from "@presidio/core";
+import { AnalysisExplanation } from "@defend-tech/presidio-core";
 
 describe("AnalysisExplanation class", () => {
   describe("constructor", () => {
@@ -112,7 +112,14 @@ describe("AnalysisExplanation class", () => {
     });
 
     test("works when initialized with existing text", () => {
-      const explanation = new AnalysisExplanation("rec", 0.5, null, null, null, "Initial");
+      const explanation = new AnalysisExplanation(
+        "rec",
+        0.5,
+        null,
+        null,
+        null,
+        "Initial",
+      );
       explanation.appendTextualExplanationLine("Appended");
       expect(explanation.textualExplanation).toBe("Initial\nAppended");
     });
@@ -120,7 +127,15 @@ describe("AnalysisExplanation class", () => {
 
   describe("toDict", () => {
     test("returns object with all own properties", () => {
-      const explanation = new AnalysisExplanation("rec", 0.5, "pat", "\\d+", true, "desc", "gms");
+      const explanation = new AnalysisExplanation(
+        "rec",
+        0.5,
+        "pat",
+        "\\d+",
+        true,
+        "desc",
+        "gms",
+      );
       const dict = explanation.toDict();
       expect(dict.recognizer).toBe("rec");
       expect(dict.originalScore).toBe(0.5);

@@ -1,5 +1,18 @@
 # Plan de Migración: Presidio → TypeScript (rama `typescript`)
 
+> **Release-readiness reconciliation (2026-07-10):** This document was an
+> aspirational migration plan, not proof of implementation. The release scope is
+> the bounded npm SDK documented in `docs/capability-parity-matrix.md`. Claims
+> of complete country coverage, concrete Compromise/API NLP engines, provider
+> recognizers, image/DICOM parity, and full Python compatibility are not
+> verified and must not be used as release claims.
+>
+> **Current executable baseline (2026-07-10):** The package set ships the
+> rule-based recognizers that compile and are deterministically loaded by the
+> registry, including country regex patterns and portable validators. The
+> detailed phase tables below remain historical design material; the capability
+> matrix and package READMEs are the release-claim source of truth.
+
 ## Objetivo
 
 Transformar Microsoft Presidio —librería de detección y anonimización de PII (Personally Identifiable Information)— en una librería **íntegramente en TypeScript**, portable a **extensión de Chrome** (service worker + content scripts) y también usable en Node.js.

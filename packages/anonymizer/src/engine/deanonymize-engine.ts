@@ -1,5 +1,5 @@
 import type { EngineResult } from "../entities/engine-result.js";
-import { OperatorConfig } from "../entities/operator-config.js";
+import type { OperatorConfig } from "../entities/operator-config.js";
 import type { RecognizerResult } from "../entities/recognizer-result.js";
 import { OperatorType } from "../operators/operator-type.js";
 import type { Operator } from "../operators/operator.js";

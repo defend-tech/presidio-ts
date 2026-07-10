@@ -1,4 +1,4 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /**
  * Recognize MAC (Media Access Control) addresses using regex.
@@ -38,8 +38,8 @@ export class MacAddressRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "MAC_ADDRESS",
+    supportedLanguage = "en",
+    supportedEntity = "MAC_ADDRESS",
     name: string | null = null,
   ) {
     super(

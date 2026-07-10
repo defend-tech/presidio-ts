@@ -1,4 +1,4 @@
-import { AnalysisExplanation, RecognizerResult } from "@presidio/core";
+import { AnalysisExplanation, RecognizerResult } from "@defend-tech/presidio-core";
 
 describe("RecognizerResult class", () => {
   describe("constructor", () => {
@@ -23,7 +23,9 @@ describe("RecognizerResult class", () => {
     test("validation metadata keys are static constants", () => {
       expect(RecognizerResult.RECOGNIZER_NAME_KEY).toBe("recognizer_name");
       expect(RecognizerResult.RECOGNIZER_IDENTIFIER_KEY).toBe("recognizer_identifier");
-      expect(RecognizerResult.IS_SCORE_ENHANCED_BY_CONTEXT_KEY).toBe("is_score_enhanced_by_context");
+      expect(RecognizerResult.IS_SCORE_ENHANCED_BY_CONTEXT_KEY).toBe(
+        "is_score_enhanced_by_context",
+      );
     });
   });
 

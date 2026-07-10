@@ -5,8 +5,8 @@ import {
   EntityRecognizer,
   LocalRecognizer,
   RecognizerResult,
-} from "@presidio/core";
-import type { NlpArtifacts } from "@presidio/core";
+} from "@defend-tech/presidio-core";
+import type { NlpArtifacts } from "@defend-tech/presidio-core";
 
 /**
  * Recognize multi-regional phone numbers using libphonenumber-js.
@@ -57,10 +57,10 @@ export class PhoneRecognizer extends LocalRecognizer {
 
   constructor(
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "PHONE_NUMBER",
+    supportedLanguage = "en",
+    supportedEntity = "PHONE_NUMBER",
     supportedRegions: string[] = PhoneRecognizer.DEFAULT_SUPPORTED_REGIONS,
-    leniency: number = 1,
+    leniency = 1,
     name: string | null = null,
   ) {
     super(
@@ -98,7 +98,10 @@ export class PhoneRecognizer extends LocalRecognizer {
     const results: RecognizerResult[] = [];
 
     // Map Python leniency (0-3) to libphonenumber-js strictness
-    const strictnessMap: Record<number, "possible" | "probable" | "significant" | "strict"> = {
+    const strictnessMap: Record<
+      number,
+      "possible" | "probable" | "significant" | "strict"
+    > = {
       0: "possible",
       1: "probable",
       2: "significant",

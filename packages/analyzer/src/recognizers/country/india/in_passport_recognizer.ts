@@ -1,11 +1,11 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /** IN_PASSPORT recognizer for IN region. */
 export class InPassportRecognizer extends PatternRecognizer {
   static override readonly COUNTRY_CODE = "in";
 
   static readonly PATTERNS = [
-
+    new Pattern("PASSPORT", "\\b[A-Z][1-9]\\d\\s?\\d{4}[1-9]\\b", 0.1),
   ];
 
   static readonly CONTEXT = ["passport", "indian passport", "passport number"];
@@ -13,8 +13,8 @@ export class InPassportRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supported_language: string = "en",
-    supported_entity: string = "IN_PASSPORT",
+    supported_language = "en",
+    supported_entity = "IN_PASSPORT",
     name: string | null = null,
   ) {
     super(
@@ -26,5 +26,4 @@ export class InPassportRecognizer extends PatternRecognizer {
       context ?? InPassportRecognizer.CONTEXT,
     );
   }
-
 }

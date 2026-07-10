@@ -1,14 +1,15 @@
 #!/usr/bin/env node
-import { readdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const TS_ROOT = "/home/staticduo/defend.tech/git/presidio-ts/packages/analyzer/src/recognizers/country";
+const TS_ROOT =
+  "/home/staticduo/defend.tech/git/presidio-ts/packages/analyzer/src/recognizers/country";
 
-const dirs = readdirSync(TS_ROOT).filter(d => !d.startsWith(".") && d !== "index.ts");
+const dirs = readdirSync(TS_ROOT).filter((d) => !d.startsWith(".") && d !== "index.ts");
 
 for (const dir of dirs) {
   const dirPath = join(TS_ROOT, dir);
-  const files = readdirSync(dirPath).filter(f => f.endsWith(".ts") && f !== "index.ts");
+  const files = readdirSync(dirPath).filter((f) => f.endsWith(".ts") && f !== "index.ts");
 
   const exports = [];
   for (const file of files) {
@@ -19,7 +20,7 @@ for (const dir of dirs) {
     }
   }
 
-  writeFileSync(join(dirPath, "index.ts"), exports.join("\n") + "\n");
+  writeFileSync(join(dirPath, "index.ts"), `${exports.join("\n")}\n`);
 }
 
 console.log(`Regenerated index.ts for ${dirs.length} countries.`);

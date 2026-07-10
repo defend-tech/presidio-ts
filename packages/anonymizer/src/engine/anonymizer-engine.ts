@@ -15,7 +15,7 @@ export class AnonymizerEngine extends EngineBase {
     analyzerResults: RecognizerResult[],
     operators: Record<string, OperatorConfig> | null = null,
     conflictResolution: ConflictResolutionStrategy = ConflictResolutionStrategy.MERGE_SIMILAR_OR_CONTAINED,
-    mergeEntitiesWithSpaces: boolean = true,
+    mergeEntitiesWithSpaces = true,
   ): Promise<EngineResult> {
     let results = this.copyRecognizerResults(analyzerResults);
     results.sort((a, b) => a.start - b.start || a.end - b.end);
@@ -140,7 +140,8 @@ export class AnonymizerEngine extends EngineBase {
 
   private copyRecognizerResults(analyzerResults: RecognizerResult[]): RecognizerResult[] {
     return analyzerResults.map(
-      (result) => new RecognizerResult(result.entityType, result.start, result.end, result.score),
+      (result) =>
+        new RecognizerResult(result.entityType, result.start, result.end, result.score),
     );
   }
 }

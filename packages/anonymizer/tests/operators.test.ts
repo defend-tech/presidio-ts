@@ -1,14 +1,14 @@
-import { describe, it, expect } from "vitest";
-import { Replace } from "../src/operators/replace.js";
-import { Redact } from "../src/operators/redact.js";
-import { Mask } from "../src/operators/mask.js";
-import { Hash } from "../src/operators/hash.js";
-import { Encrypt } from "../src/operators/encrypt.js";
-import { Decrypt } from "../src/operators/decrypt.js";
-import { Keep } from "../src/operators/keep.js";
+import { describe, expect, it } from "vitest";
 import { Custom } from "../src/operators/custom.js";
+import { Decrypt } from "../src/operators/decrypt.js";
+import { Encrypt } from "../src/operators/encrypt.js";
+import { Hash } from "../src/operators/hash.js";
+import { Keep } from "../src/operators/keep.js";
+import { Mask } from "../src/operators/mask.js";
 import { OperatorType } from "../src/operators/operator-type.js";
 import { OperatorsFactory } from "../src/operators/operators-factory.js";
+import { Redact } from "../src/operators/redact.js";
+import { Replace } from "../src/operators/replace.js";
 
 // ---------------------------------------------------------------------------
 // Replace
@@ -71,7 +71,11 @@ describe("Redact operator", () => {
   });
 
   it("returns empty string regardless of input text length", () => {
-    expect(operator.operate("a very long piece of sensitive information that should be redacted entirely")).toBe("");
+    expect(
+      operator.operate(
+        "a very long piece of sensitive information that should be redacted entirely",
+      ),
+    ).toBe("");
   });
 
   it("validation never throws", () => {
@@ -285,9 +289,7 @@ describe("Encrypt operator", () => {
   });
 
   it("throws when key is missing", () => {
-    expect(() => operator.validate({})).toThrow(
-      "key must be a string or Uint8Array",
-    );
+    expect(() => operator.validate({})).toThrow("key must be a string or Uint8Array");
   });
 });
 
@@ -355,9 +357,7 @@ describe("Encrypt/Decrypt roundtrip", () => {
   it("decrypt with wrong key fails", async () => {
     const encrypted = await encryptOp.operate("secret", { key });
     const wrongKey = "abcdefabcdefabcdefabcdefabcdefab"; // different 32-byte key
-    await expect(
-      decryptOp.operate(encrypted, { key: wrongKey }),
-    ).rejects.toThrow();
+    await expect(decryptOp.operate(encrypted, { key: wrongKey })).rejects.toThrow();
   });
 });
 
@@ -419,21 +419,19 @@ describe("Custom operator", () => {
   });
 
   it("throws when lambda returns non-string", () => {
-    expect(() =>
-      operator.operate("text", { lambda: () => 42 }),
-    ).toThrow("Function return type must be a string");
+    expect(() => operator.operate("text", { lambda: () => 42 })).toThrow(
+      "Function return type must be a string",
+    );
   });
 
   it("throws when lambda returns undefined", () => {
-    expect(() =>
-      operator.operate("text", { lambda: () => {} }),
-    ).toThrow("Function return type must be a string");
+    expect(() => operator.operate("text", { lambda: () => {} })).toThrow(
+      "Function return type must be a string",
+    );
   });
 
   it("throws when lambda is missing", () => {
-    expect(() => operator.validate({})).toThrow(
-      "New value must be a callable function",
-    );
+    expect(() => operator.validate({})).toThrow("New value must be a callable function");
   });
 });
 

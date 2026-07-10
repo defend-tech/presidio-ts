@@ -15,18 +15,18 @@
     "outDir": "dist",
     "rootDir": ".",
     "paths": {
-      "@presidio/core": ["./packages/core/src"],
-      "@presidio/core/*": ["./packages/core/src/*"],
-      "@presidio/analyzer": ["./packages/analyzer/src"],
-      "@presidio/analyzer/*": ["./packages/analyzer/src/*"],
-      "@presidio/anonymizer": ["./packages/anonymizer/src"],
-      "@presidio/anonymizer/*": ["./packages/anonymizer/src/*"],
-      "@presidio/image-redactor": ["./packages/image-redactor/src"],
-      "@presidio/image-redactor/*": ["./packages/image-redactor/src/*"],
-      "@presidio/structured": ["./packages/structured/src"],
-      "@presidio/structured/*": ["./packages/structured/src/*"],
-      "@presidio/cli": ["./packages/cli/src"],
-      "@presidio/cli/*": ["./packages/cli/src/*"]
+      "@defend-tech/presidio-core": ["./packages/core/src"],
+      "@defend-tech/presidio-core/*": ["./packages/core/src/*"],
+      "@defend-tech/presidio-analyzer": ["./packages/analyzer/src"],
+      "@defend-tech/presidio-analyzer/*": ["./packages/analyzer/src/*"],
+      "@defend-tech/presidio-anonymizer": ["./packages/anonymizer/src"],
+      "@defend-tech/presidio-anonymizer/*": ["./packages/anonymizer/src/*"],
+      "@defend-tech/presidio-image-redactor": ["./packages/image-redactor/src"],
+      "@defend-tech/presidio-image-redactor/*": ["./packages/image-redactor/src/*"],
+      "@defend-tech/presidio-structured": ["./packages/structured/src"],
+      "@defend-tech/presidio-structured/*": ["./packages/structured/src/*"],
+      "@defend-tech/presidio-cli": ["./packages/cli/src"],
+      "@defend-tech/presidio-cli/*": ["./packages/cli/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

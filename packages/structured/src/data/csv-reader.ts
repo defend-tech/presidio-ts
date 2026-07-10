@@ -6,7 +6,9 @@ export function readCsv(input: string): Record<string, unknown>[] {
   const [headers, ...values] = records;
   return values
     .filter((row) => row.some((value) => value !== ""))
-    .map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ""])));
+    .map((row) =>
+      Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ""])),
+    );
 }
 
 function parseCsv(input: string): string[][] {

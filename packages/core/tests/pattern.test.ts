@@ -1,11 +1,24 @@
-import { Pattern } from "@presidio/core";
+import { Pattern } from "@defend-tech/presidio-core";
 
 describe("Pattern class", () => {
+  test("normalizes Python inline flags wherever they occur in a pattern", () => {
+    expect(Pattern.normalizePythonRegex("\\b(?i)[A-Z]+\\b")).toEqual({
+      source: "\\b[A-Z]+\\b",
+      flags: "i",
+    });
+  });
+
   describe("constructor validation", () => {
     test("creates a valid Pattern with name, regex, and score", () => {
-      const pattern = new Pattern("email", "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b", 0.85);
+      const pattern = new Pattern(
+        "email",
+        "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
+        0.85,
+      );
       expect(pattern.name).toBe("email");
-      expect(pattern.regex).toBe("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+      expect(pattern.regex).toBe(
+        "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
+      );
       expect(pattern.score).toBe(0.85);
       expect(pattern.compiledRegex).toBeNull();
       expect(pattern.compiledWithFlags).toBeUndefined();
@@ -27,9 +40,7 @@ describe("Pattern class", () => {
     });
 
     test("invalid regex throws error", () => {
-      expect(() => new Pattern("bad", "[invalid", 0.5)).toThrow(
-        /Invalid regex pattern/,
-      );
+      expect(() => new Pattern("bad", "[invalid", 0.5)).toThrow(/Invalid regex pattern/);
     });
 
     test("score below 0 throws error", () => {
@@ -82,7 +93,11 @@ describe("Pattern class", () => {
 
   describe("toDict / fromDict roundtrip", () => {
     test("roundtrip preserves all fields", () => {
-      const original = new Pattern("credit_card", "\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b", 0.9);
+      const original = new Pattern(
+        "credit_card",
+        "\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b",
+        0.9,
+      );
       const dict = original.toDict();
       const restored = Pattern.fromDict(dict);
       expect(restored.name).toBe(original.name);
@@ -100,7 +115,11 @@ describe("Pattern class", () => {
 
   describe("toString", () => {
     test("returns JSON string of the pattern dict", () => {
-      const pattern = new Pattern("ipv4", "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", 0.5);
+      const pattern = new Pattern(
+        "ipv4",
+        "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}",
+        0.5,
+      );
       const jsonStr = pattern.toString();
       const parsed = JSON.parse(jsonStr);
       expect(parsed).toEqual({

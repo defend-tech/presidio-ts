@@ -9,7 +9,8 @@
     "packages/anonymizer",
     "packages/image-redactor",
     "packages/structured",
-    "packages/cli"
+    "packages/cli",
+    "fixtures/mv3"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
@@ -23,17 +24,21 @@
     "test:core": "npm run test -w packages/core",
     "test:analyzer": "npm run test -w packages/analyzer",
     "test:anonymizer": "npm run test -w packages/anonymizer",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
+    "lint": "biome check packages scripts fixtures/mv3 package.json package-lock.json biome.json tsconfig.json tsconfig.browser.json tsconfig.node.json vitest.config.ts README.md plan.md docs/capability-parity-matrix.md",
+    "lint:fix": "biome check --write packages scripts fixtures/mv3 package.json package-lock.json biome.json tsconfig.json tsconfig.browser.json tsconfig.node.json vitest.config.ts README.md plan.md docs/capability-parity-matrix.md",
     "format": "biome format --write .",
     "clean": "npm run clean --workspaces --if-present",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.browser.json && tsc --noEmit -p tsconfig.node.json",
+    "pack:check": "node scripts/release-check.mjs",
+    "test:mv3": "npm run build -w presidio-mv3-fixture && test -f fixtures/mv3/dist/manifest.json && test -f fixtures/mv3/dist/service-worker.js && ! rg -n 'node:|require\\(|process\\.|Buffer|child_process' fixtures/mv3/dist",
+    "release:check": "npm run lint && npm run typecheck && npm test && npm run build && npm run pack:check && npm run test:mv3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.3",
     "tsup": "^8.3.5",
+    "vite": "^5.4.21",
     "vitest": "^2.1.8"
   },
   "engines": {

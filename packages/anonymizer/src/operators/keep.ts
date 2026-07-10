@@ -1,5 +1,5 @@
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import { Operator } from "./operator.js";
 
 /** No-op anonymizer that keeps the PII text unmodified. */
 export class Keep extends Operator {

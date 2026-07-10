@@ -1,6 +1,12 @@
-import { AnalyzerEngine } from "@presidio/analyzer";
+import { AnalyzerEngine } from "@defend-tech/presidio-analyzer";
+import { AnonymizerEngine } from "@defend-tech/presidio-anonymizer";
+import type {
+  StructuredAnalysisResult,
+  StructuredAnonymizationResult,
+  StructuredAnonymizeConfig,
+  StructuredConfig,
+} from "../entities.js";
 import { AnalysisBuilder } from "./analysis-builder.js";
-import type { StructuredAnalysisResult, StructuredConfig } from "../entities.js";
 
 /** Detects PII in native JavaScript tabular data. */
 export class StructuredEngine {
@@ -36,11 +42,45 @@ export class StructuredEngine {
     return this.pre_build_analysis(rows, config);
   }
 
+  /** Analyze and anonymize selected string cells without mutating input rows. */
+  public async anonymize(
+    rows: ReadonlyArray<Record<string, unknown>>,
+    config: StructuredAnonymizeConfig = {},
+  ): Promise<StructuredAnonymizationResult> {
+    const analysis = await this.analyze(rows, config);
+    const anonymizer = config.anonymizer ?? new AnonymizerEngine();
+    const output = rows.map((row) => ({ ...row }));
+    const columns: StructuredAnonymizationResult["columns"] = {};
+
+    for (const [column, result] of Object.entries(analysis.columns)) {
+      columns[column] = [];
+      for (const cell of result.cells) {
+        if (typeof cell.value !== "string" || cell.results.length === 0) {
+          columns[column].push({ rowIndex: cell.rowIndex, value: cell.value });
+          continue;
+        }
+        const anonymized = await anonymizer.anonymize(
+          cell.value,
+          cell.results,
+          config.operators,
+        );
+        output[cell.rowIndex][column] = anonymized.text;
+        columns[column].push({
+          rowIndex: cell.rowIndex,
+          value: cell.value,
+          result: anonymized,
+        });
+      }
+    }
+    return { rows: output, columns };
+  }
+
   private mergeConfig(config: StructuredConfig): StructuredConfig {
     return {
       ...this.defaultConfig,
       ...config,
-      defaultAnalyzer: config.defaultAnalyzer ?? this.defaultConfig.defaultAnalyzer ?? this.analyzer,
+      defaultAnalyzer:
+        config.defaultAnalyzer ?? this.defaultConfig.defaultAnalyzer ?? this.analyzer,
     };
   }
 }

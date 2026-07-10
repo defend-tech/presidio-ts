@@ -5,8 +5,6 @@ import type { NlpArtifacts } from "./nlp-artifacts.js";
 import { Pattern } from "./pattern.js";
 import { RecognizerResult } from "./recognizer-result.js";
 
-const REGEX_TIMEOUT_MS = 60_000;
-
 /**
  * PII entity recognizer using regular expressions or deny-lists.
  */
@@ -19,13 +17,13 @@ export class PatternRecognizer extends LocalRecognizer {
   constructor(
     supportedEntity: string,
     name: string | null = null,
-    supportedLanguage: string = "en",
+    supportedLanguage = "en",
     patterns: Pattern[] | null = null,
     denyList: string[] | null = null,
     context: string[] | null = null,
-    denyListScore: number = 1.0,
-    globalRegexFlags: string = "gmsi",
-    version: string = "0.0.1",
+    denyListScore = 1.0,
+    globalRegexFlags = "gmsi",
+    version = "0.0.1",
     countryCode: string | null = null,
   ) {
     if (!supportedEntity) {
@@ -37,14 +35,7 @@ export class PatternRecognizer extends LocalRecognizer {
       );
     }
 
-    super(
-      [supportedEntity],
-      name,
-      supportedLanguage,
-      version,
-      context,
-      countryCode,
-    );
+    super([supportedEntity], name, supportedLanguage, version, context, countryCode);
 
     this.patterns = patterns ?? [];
     this.denyList = denyList ?? [];
@@ -119,16 +110,20 @@ export class PatternRecognizer extends LocalRecognizer {
 
     for (const pattern of this.patterns) {
       // Compile or reuse regex
+      const normalized = Pattern.normalizePythonRegex(pattern.regex);
+      const patternFlags = [
+        ...new Set(`${effectiveFlags}${normalized.flags}`.split("")),
+      ].join("");
       const regex =
         pattern.compiledRegex !== null && pattern.compiledWithFlags === effectiveFlags
           ? pattern.compiledRegex
-          : new RegExp(pattern.regex, effectiveFlags);
+          : new RegExp(normalized.source, patternFlags);
 
       // Cache compilation
       pattern.compiledRegex = regex;
       pattern.compiledWithFlags = effectiveFlags;
 
-      // Match with timeout via Promise.race
+      // JavaScript regex execution is synchronous; no timeout is claimed here.
       const matchResult = this.#matchWithTimeout(regex, text);
 
       if (matchResult === null) {
@@ -143,7 +138,7 @@ export class PatternRecognizer extends LocalRecognizer {
 
         if (currentMatch === "") continue;
 
-        let score = pattern.score;
+        const score = pattern.score;
 
         const validationResult = this.validateResult(currentMatch);
         const description = PatternRecognizer.buildRegexExplanation(
@@ -195,12 +190,13 @@ export class PatternRecognizer extends LocalRecognizer {
 
     // If regex is global, use a loop; if not, just exec once
     if (regex.global || regex.sticky) {
-      let match: RegExpExecArray | null;
-      while ((match = regex.exec(text)) !== null) {
+      let match = regex.exec(text);
+      while (match !== null) {
         matches.push(match);
         if (!regex.global) break;
         // Avoid infinite loops on zero-length matches
         if (match.index === regex.lastIndex) regex.lastIndex++;
+        match = regex.exec(text);
       }
     } else {
       const match = regex.exec(text);

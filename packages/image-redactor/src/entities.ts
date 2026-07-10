@@ -1,4 +1,4 @@
-import { RecognizerResult as TextRecognizerResult } from "@presidio/core";
+import { RecognizerResult as TextRecognizerResult } from "@defend-tech/presidio-core";
 
 /** A color used by Canvas image data and redaction fills. */
 export interface ImagePixel {

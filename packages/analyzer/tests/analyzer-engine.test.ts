@@ -1,10 +1,21 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { AnalyzerEngine } from "../src/engine/analyzer-engine";
-import { BatchAnalyzerEngine, DictAnalyzerResult } from "../src/engine/batch-analyzer-engine";
+import {
+  BatchAnalyzerEngine,
+  type DictAnalyzerResult,
+} from "../src/engine/batch-analyzer-engine";
 import { AnalyzerRequest } from "../src/entities/analyzer-request";
+import {
+  AuAbnRecognizer,
+  CaSinRecognizer,
+  PhTinRecognizer,
+  UsSsnRecognizer,
+} from "../src/index";
+import { CreditCardRecognizer } from "../src/recognizers/generic/credit-card";
+import { CryptoRecognizer } from "../src/recognizers/generic/crypto";
+import { DateRecognizer } from "../src/recognizers/generic/date";
 import { EmailRecognizer } from "../src/recognizers/generic/email";
 import { PhoneRecognizer } from "../src/recognizers/generic/phone";
-import { CreditCardRecognizer } from "../src/recognizers/generic/credit-card";
 import { RecognizerRegistry } from "../src/registry/recognizer-registry";
 
 describe("AnalyzerEngine", () => {
@@ -32,11 +43,9 @@ describe("AnalyzerEngine", () => {
   });
 
   it("detects phone numbers", async () => {
-    const results = await engine.analyze(
-      "My phone number is +1-212-555-5555",
-      "en",
-      { entities: ["PHONE_NUMBER"] },
-    );
+    const results = await engine.analyze("My phone number is +1-212-555-5555", "en", {
+      entities: ["PHONE_NUMBER"],
+    });
     // PhoneRecognizer validates; at least some phone formats are detected
     const phone = results.find((r) => r.entityType === "PHONE_NUMBER");
     if (phone) {
@@ -47,42 +56,30 @@ describe("AnalyzerEngine", () => {
     }
   });
 
-it("removes results below threshold", async () => {
+  it("removes results below threshold", async () => {
     // With threshold > 1.0, no results should pass
-    const results = await engine.analyze(
-      "Contact john@example.com",
-      "en",
-      {
-        entities: ["EMAIL_ADDRESS"],
-        scoreThreshold: 1.01,
-      },
-    );
+    const results = await engine.analyze("Contact john@example.com", "en", {
+      entities: ["EMAIL_ADDRESS"],
+      scoreThreshold: 1.01,
+    });
     expect(results.length).toBe(0);
   });
 
   it("strips decision process when returnDecisionProcess is false", async () => {
-    const results = await engine.analyze(
-      "Email: john@example.com",
-      "en",
-      {
-        entities: ["EMAIL_ADDRESS"],
-        returnDecisionProcess: false,
-      },
-    );
+    const results = await engine.analyze("Email: john@example.com", "en", {
+      entities: ["EMAIL_ADDRESS"],
+      returnDecisionProcess: false,
+    });
     for (const r of results) {
       expect(r.analysisExplanation).toBeNull();
     }
   });
 
   it("keeps decision process when returnDecisionProcess is true", async () => {
-    const results = await engine.analyze(
-      "Email: john@example.com",
-      "en",
-      {
-        entities: ["EMAIL_ADDRESS"],
-        returnDecisionProcess: true,
-      },
-    );
+    const results = await engine.analyze("Email: john@example.com", "en", {
+      entities: ["EMAIL_ADDRESS"],
+      returnDecisionProcess: true,
+    });
     const emails = results.filter((r) => r.entityType === "EMAIL_ADDRESS");
     if (emails.length > 0) {
       expect(emails[0].analysisExplanation).not.toBeNull();
@@ -90,15 +87,11 @@ it("removes results below threshold", async () => {
   });
 
   it("filters via allow-list (exact)", async () => {
-    const results = await engine.analyze(
-      "Support email: support@example.com",
-      "en",
-      {
-        entities: ["EMAIL_ADDRESS"],
-        allowList: ["support@example.com"],
-        allowListMatch: "exact",
-      },
-    );
+    const results = await engine.analyze("Support email: support@example.com", "en", {
+      entities: ["EMAIL_ADDRESS"],
+      allowList: ["support@example.com"],
+      allowListMatch: "exact",
+    });
     const emails = results.filter((r) => r.entityType === "EMAIL_ADDRESS" && r.score > 0);
     expect(emails.length).toBe(0);
   });
@@ -136,6 +129,63 @@ it("removes results below threshold", async () => {
   });
 });
 
+describe("country recognizer ports", () => {
+  it("exposes upstream patterns and country metadata", () => {
+    expect(AuAbnRecognizer.PATTERNS).not.toHaveLength(0);
+    expect(new PhTinRecognizer().countryCode()).toBe("ph");
+  });
+});
+
+describe("built-in rule recognizers", () => {
+  it("loads generic recognizers deterministically without duplicates", () => {
+    const registry = new RecognizerRegistry();
+    registry.loadPredefinedRecognizers();
+    const firstCount = registry.recognizers.length;
+    registry.loadPredefinedRecognizers();
+    expect(firstCount).toBe(9);
+    expect(registry.recognizers).toHaveLength(firstCount);
+    expect(registry.getSupportedEntities()).toContain("EMAIL_ADDRESS");
+  });
+
+  it("does not enable country recognizers by default and loads selected countries explicitly", () => {
+    const registry = new RecognizerRegistry();
+    registry.loadPredefinedRecognizers();
+    expect(registry.getCountryCodes()).toEqual([]);
+    registry.loadCountryRecognizers(["us"]);
+    expect(registry.getCountryCodes()).toEqual(["us"]);
+  });
+
+  it("rejects invalid US SSNs and Canadian SINs", () => {
+    expect(new UsSsnRecognizer().invalidateResult("000-12-3456")).toBe(true);
+    expect(new UsSsnRecognizer().invalidateResult("123-45-6789")).toBe(false);
+    expect(new CaSinRecognizer().invalidateResult("130 692 544")).toBe(false);
+    expect(new CaSinRecognizer().invalidateResult("130 692 545")).toBe(true);
+  });
+});
+
+describe("generic validator fixtures", () => {
+  it("accepts Base58Check upstream Bitcoin fixtures and rejects bad checksums", () => {
+    const recognizer = new CryptoRecognizer();
+    expect(recognizer.validateResult("1BoatSLRHtKNngkdXEeobR76b53LETtpyT")).toBe(true);
+    expect(recognizer.validateResult("3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy")).toBe(true);
+    expect(recognizer.validateResult("1BoatSLRHtKNngkdXEeobR76b53LETtpyU")).toBe(false);
+  });
+
+  it("requires an ICANN public suffix while preserving IDN emails", () => {
+    const recognizer = new EmailRecognizer();
+    expect(recognizer.validateResult("person@example.invalid")).toBe(false);
+    expect(recognizer.validateResult("person@xn--bcher-kva.de")).toBe(true);
+    expect(recognizer.validateResult("person@bücher.de")).toBe(true);
+  });
+
+  it("filters impossible calendar dates including leap-year boundaries", () => {
+    const recognizer = new DateRecognizer();
+    expect(recognizer.analyze("2024-02-29", ["DATE_TIME"])).toHaveLength(1);
+    expect(recognizer.analyze("2023-02-29", ["DATE_TIME"])).toHaveLength(0);
+    expect(recognizer.analyze("2024-04-31", ["DATE_TIME"])).toHaveLength(0);
+  });
+});
+
 describe("BatchAnalyzerEngine", () => {
   it("analyzes a list of texts", async () => {
     const registry = new RecognizerRegistry();
@@ -144,11 +194,7 @@ describe("BatchAnalyzerEngine", () => {
     const batch = new BatchAnalyzerEngine(ae);
 
     const results = await batch.analyzeIterator(
-      [
-        "Contact alice@example.com",
-        "Call 212-555-5555",
-        "No PII here",
-      ],
+      ["Contact alice@example.com", "Call 212-555-5555", "No PII here"],
       "en",
       1,
       1,

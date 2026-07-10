@@ -1,11 +1,10 @@
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import { Operator } from "./operator.js";
 
 /**
  * Hash operator - replaces PII text with its SHA-256 hash.
  *
- * For browser environments, uses the Web Crypto API (crypto.subtle).
- * For Node.js, falls back to the Node crypto module.
+ * Uses the Web Crypto API available in supported Node.js and browser runtimes.
  */
 export class Hash extends Operator {
   operatorType = OperatorType.Anonymize;
@@ -29,9 +28,7 @@ export class Hash extends Operator {
       return this.#bufferToHex(hashBuffer);
     }
 
-    // Fallback for Node.js < 15 (should not happen with Node 18+)
-    const { createHash } = await import("node:crypto");
-    return createHash("sha256").update(text).digest("hex");
+    throw new Error("Web Crypto SHA-256 is required for hash anonymization");
   }
 
   #bufferToHex(buffer: ArrayBuffer): string {

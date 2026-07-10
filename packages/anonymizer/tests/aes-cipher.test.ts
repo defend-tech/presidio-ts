@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { AESCipher } from "../src/crypto/aes-cipher.js";
 
 // ---------------------------------------------------------------------------
@@ -57,6 +57,18 @@ describe("AESCipher — key validation", () => {
 // AESCipher — Encrypt + Decrypt roundtrip
 // ---------------------------------------------------------------------------
 describe("AESCipher — encrypt/decrypt roundtrip", () => {
+  it("decrypts fixed Python cryptography AES-256-CBC PKCS7 vectors", async () => {
+    const key = new Uint8Array([...Array(32).keys()]);
+    await expect(
+      AESCipher.decrypt(key, "AAECAwQFBgcICQoLDA0OD3_RLa-36VmdC4Sa2MLjwh8"),
+    ).resolves.toBe("hello");
+    await expect(
+      AESCipher.decrypt(
+        key,
+        "Dw4NDAsKCQgHBgUEAwIBAHhioHHaGfMobc1Mp8qcbj7vwQ0_o9ZG5ocrab2nNQoZ",
+      ),
+    ).resolves.toBe("0123456789abcdef");
+  });
   it("roundtrips a simple string with 256-bit key", async () => {
     const key = "0123456789abcdef0123456789abcdef";
     const plaintext = "Hello, World!";
@@ -143,21 +155,21 @@ describe("AESCipher — encrypt/decrypt roundtrip", () => {
 // ---------------------------------------------------------------------------
 describe("AESCipher — invalid key size detection", () => {
   it("encrypt throws for invalid key size (short string)", async () => {
-    await expect(
-      AESCipher.encrypt("short", "data"),
-    ).rejects.toThrow("Invalid input, key must be of length 128, 192 or 256 bits");
+    await expect(AESCipher.encrypt("short", "data")).rejects.toThrow(
+      "Invalid input, key must be of length 128, 192 or 256 bits",
+    );
   });
 
   it("encrypt throws for invalid key size (wrong length Uint8Array)", async () => {
-    await expect(
-      AESCipher.encrypt(new Uint8Array(5), "data"),
-    ).rejects.toThrow("Invalid input, key must be of length 128, 192 or 256 bits");
+    await expect(AESCipher.encrypt(new Uint8Array(5), "data")).rejects.toThrow(
+      "Invalid input, key must be of length 128, 192 or 256 bits",
+    );
   });
 
   it("decrypt throws for invalid key size", async () => {
-    await expect(
-      AESCipher.decrypt("short", "dGVzdA=="),
-    ).rejects.toThrow("Invalid input, key must be of length 128, 192 or 256 bits");
+    await expect(AESCipher.decrypt("short", "dGVzdA==")).rejects.toThrow(
+      "Invalid input, key must be of length 128, 192 or 256 bits",
+    );
   });
 });
 
@@ -235,15 +247,11 @@ describe("AESCipher — output format and properties", () => {
   it("decrypt with wrong key throws decoding/cryptographic error", async () => {
     const encrypted = await AESCipher.encrypt(key, "secret");
     const wrongKey = "abcdefabcdefabcdefabcdefabcdefab"; // different 32-byte string
-    await expect(
-      AESCipher.decrypt(wrongKey, encrypted),
-    ).rejects.toThrow();
+    await expect(AESCipher.decrypt(wrongKey, encrypted)).rejects.toThrow();
   });
 
   it("decrypt with garbage ciphertext throws", async () => {
-    await expect(
-      AESCipher.decrypt(key, "not-valid-base64url!!!"),
-    ).rejects.toThrow();
+    await expect(AESCipher.decrypt(key, "not-valid-base64url!!!")).rejects.toThrow();
   });
 });
 

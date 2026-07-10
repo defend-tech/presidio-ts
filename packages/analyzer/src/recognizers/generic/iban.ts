@@ -1,13 +1,9 @@
 import { isValidIBAN as ibantoolsIsValidIBAN } from "ibantools";
 
-import { EntityRecognizer, Pattern, PatternRecognizer } from "@presidio/core";
-import type { NlpArtifacts } from "@presidio/core";
-import { RecognizerResult } from "@presidio/core";
-import {
-  BOS,
-  EOS,
-  regexPerCountry,
-} from "./iban-patterns.js";
+import { EntityRecognizer, Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
+import type { NlpArtifacts } from "@defend-tech/presidio-core";
+import { RecognizerResult } from "@defend-tech/presidio-core";
+import { BOS, EOS, regexPerCountry } from "./iban-patterns.js";
 
 /**
  * Recognize IBAN codes using regex and checksum validation.
@@ -54,11 +50,11 @@ export class IbanRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "IBAN_CODE",
-    exactMatch: boolean = false,
+    supportedLanguage = "en",
+    supportedEntity = "IBAN_CODE",
+    exactMatch = false,
     bosEos: [string, string] = [BOS, EOS],
-    globalRegexFlags: string = "gmsi",
+    globalRegexFlags = "gmsi",
     replacementPairs: [string, string][] | null = null,
     name: string | null = null,
   ) {
@@ -72,7 +68,10 @@ export class IbanRecognizer extends PatternRecognizer {
       1.0,
       globalRegexFlags,
     );
-    this.replacementPairs = replacementPairs ?? [[ "-", "" ], [ " ", "" ]];
+    this.replacementPairs = replacementPairs ?? [
+      ["-", ""],
+      [" ", ""],
+    ];
     this.exactMatch = exactMatch;
     this.bosEos = exactMatch ? bosEos : ["", ""];
   }
@@ -150,9 +149,9 @@ export class IbanRecognizer extends PatternRecognizer {
 
     for (const pattern of this.patterns) {
       const regex = new RegExp(pattern.regex, this.globalRegexFlags);
-      let match: RegExpExecArray | null;
+      let match = regex.exec(text);
 
-      while ((match = regex.exec(text)) !== null) {
+      while (match !== null) {
         // Iterate through capture groups in reverse order (3 → 2 → 1)
         const numGroups = match.length - 1;
 
@@ -214,6 +213,7 @@ export class IbanRecognizer extends PatternRecognizer {
             break; // Found a valid match for this occurrence, try next occurrence
           }
         }
+        match = regex.exec(text);
       }
     }
 
@@ -233,12 +233,14 @@ export class IbanRecognizer extends PatternRecognizer {
    */
   private static generateIbanCheckDigits(iban: string): string {
     // Replace letters with their numeric equivalents
-    const numbered = [...iban].map((ch) => {
-      if (ch >= "0" && ch <= "9") return ch;
-      if (ch >= "A" && ch <= "Z") return String(ch.charCodeAt(0) - 55);
-      if (ch >= "a" && ch <= "z") return String(ch.charCodeAt(0) - 87);
-      return ch;
-    }).join("");
+    const numbered = [...iban]
+      .map((ch) => {
+        if (ch >= "0" && ch <= "9") return ch;
+        if (ch >= "A" && ch <= "Z") return String(ch.charCodeAt(0) - 55);
+        if (ch >= "a" && ch <= "z") return String(ch.charCodeAt(0) - 87);
+        return ch;
+      })
+      .join("");
 
     // MOD-97 using BigInt for large number handling
     let remainder = BigInt(0);
@@ -256,10 +258,7 @@ export class IbanRecognizer extends PatternRecognizer {
    * @param bosEos - Beginning and end of string anchors
    * @returns `true` if the format matches
    */
-  private static isValidFormat(
-    iban: string,
-    bosEos: [string, string],
-  ): boolean {
+  private static isValidFormat(iban: string, bosEos: [string, string]): boolean {
     const countryCode = iban.slice(0, 2);
     const countryRegex = regexPerCountry[countryCode];
     if (!countryRegex) {

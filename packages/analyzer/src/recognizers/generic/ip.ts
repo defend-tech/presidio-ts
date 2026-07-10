@@ -1,4 +1,4 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /**
  * Recognize IPv4 and IPv6 addresses using regex with validation.
@@ -42,8 +42,8 @@ export class IpRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "IP_ADDRESS",
+    supportedLanguage = "en",
+    supportedEntity = "IP_ADDRESS",
     name: string | null = null,
   ) {
     super(
@@ -90,8 +90,8 @@ export class IpRecognizer extends PatternRecognizer {
     if (ipv4Regex.test(ipPart)) {
       // Validate CIDR prefix if present
       if (parts.length === 2) {
-        const cidr = parseInt(parts[1], 10);
-        if (isNaN(cidr) || cidr < 0 || cidr > 32) {
+        const cidr = Number.parseInt(parts[1], 10);
+        if (Number.isNaN(cidr) || cidr < 0 || cidr > 32) {
           throw new Error("Invalid IPv4 CIDR");
         }
       }
@@ -107,8 +107,8 @@ export class IpRecognizer extends PatternRecognizer {
     if (ipv6Regex.test(ipv6Part)) {
       // Validate CIDR prefix if present
       if (parts.length === 2) {
-        const cidr = parseInt(parts[1], 10);
-        if (isNaN(cidr) || cidr < 0 || cidr > 128) {
+        const cidr = Number.parseInt(parts[1], 10);
+        if (Number.isNaN(cidr) || cidr < 0 || cidr > 128) {
           throw new Error("Invalid IPv6 CIDR");
         }
       }

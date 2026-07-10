@@ -4,8 +4,8 @@ import { Encrypt } from "./encrypt.js";
 import { Hash } from "./hash.js";
 import { Keep } from "./keep.js";
 import { Mask } from "./mask.js";
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import type { Operator } from "./operator.js";
 import { Redact } from "./redact.js";
 import { Replace } from "./replace.js";
 
@@ -52,7 +52,8 @@ export class OperatorsFactory {
   }
 
   createOperatorClass(name: string, type: OperatorType): Operator {
-    const registry = type === OperatorType.Anonymize ? this.anonymizers : this.deanonymizers;
+    const registry =
+      type === OperatorType.Anonymize ? this.anonymizers : this.deanonymizers;
     const ctor = registry.get(name);
     if (!ctor) {
       throw new Error(`Operator ${name} is not registered for type ${type}`);

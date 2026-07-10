@@ -2,7 +2,11 @@ import type { ImageSource, OcrEngine, OcrResult } from "../entities.js";
 
 interface AzureReadResponse {
   analyzeResult?: {
-    readResults?: Array<{ lines?: Array<{ words?: Array<{ text?: string; confidence?: number; boundingBox?: number[] }> }> }>;
+    readResults?: Array<{
+      lines?: Array<{
+        words?: Array<{ text?: string; confidence?: number; boundingBox?: number[] }>;
+      }>;
+    }>;
   };
 }
 
@@ -16,19 +20,29 @@ export class AzureOcr implements OcrEngine {
 
   async processText(image: ImageSource): Promise<OcrResult> {
     const body = await toBlob(image);
-    const response = await fetch(`${this.endpoint.replace(/\/$/, "")}/vision/${this.apiVersion}/read/analyze`, {
-      method: "POST",
-      headers: { "Ocp-Apim-Subscription-Key": this.apiKey, "Content-Type": body.type || "application/octet-stream" },
-      body,
-    });
+    const response = await fetch(
+      `${this.endpoint.replace(/\/$/, "")}/vision/${this.apiVersion}/read/analyze`,
+      {
+        method: "POST",
+        headers: {
+          "Ocp-Apim-Subscription-Key": this.apiKey,
+          "Content-Type": body.type || "application/octet-stream",
+        },
+        body,
+      },
+    );
     if (!response.ok) throw new Error(`Azure OCR request failed: ${response.status}`);
     const operationUrl = response.headers.get("operation-location");
-    if (!operationUrl) throw new Error("Azure OCR response did not include operation-location");
+    if (!operationUrl)
+      throw new Error("Azure OCR response did not include operation-location");
 
     for (let attempt = 0; attempt < 30; attempt += 1) {
-      const result = await fetch(operationUrl, { headers: { "Ocp-Apim-Subscription-Key": this.apiKey } });
-      if (!result.ok) throw new Error(`Azure OCR status request failed: ${result.status}`);
-      const payload = await result.json() as AzureReadResponse & { status?: string };
+      const result = await fetch(operationUrl, {
+        headers: { "Ocp-Apim-Subscription-Key": this.apiKey },
+      });
+      if (!result.ok)
+        throw new Error(`Azure OCR status request failed: ${result.status}`);
+      const payload = (await result.json()) as AzureReadResponse & { status?: string };
       if (payload.status === "succeeded") return normalizeAzureResult(payload);
       if (payload.status === "failed") throw new Error("Azure OCR operation failed");
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -37,16 +51,25 @@ export class AzureOcr implements OcrEngine {
   }
 }
 
-function normalizeAzureResult(result: AzureReadResponse): OcrResult {
-  const words = result.analyzeResult?.readResults?.flatMap((page) =>
-    page.lines?.flatMap((line) => line.words ?? []) ?? [],
-  ) ?? [];
+export function normalizeAzureResult(result: AzureReadResponse): OcrResult {
+  const words =
+    result.analyzeResult?.readResults?.flatMap(
+      (page) => page.lines?.flatMap((line) => line.words ?? []) ?? [],
+    ) ?? [];
   const boxes = words.map((word) => word.boundingBox ?? []);
   return {
-    left: boxes.map((box) => Math.min(...box.filter((_, index) => index % 2 === 0), 0)),
-    top: boxes.map((box) => Math.min(...box.filter((_, index) => index % 2 === 1), 0)),
-    width: boxes.map((box) => Math.max(...box.filter((_, index) => index % 2 === 0), 0) - Math.min(...box.filter((_, index) => index % 2 === 0), 0)),
-    height: boxes.map((box) => Math.max(...box.filter((_, index) => index % 2 === 1), 0) - Math.min(...box.filter((_, index) => index % 2 === 1), 0)),
+    left: boxes.map((box) => Math.min(...box.filter((_, index) => index % 2 === 0))),
+    top: boxes.map((box) => Math.min(...box.filter((_, index) => index % 2 === 1))),
+    width: boxes.map(
+      (box) =>
+        Math.max(...box.filter((_, index) => index % 2 === 0)) -
+        Math.min(...box.filter((_, index) => index % 2 === 0)),
+    ),
+    height: boxes.map(
+      (box) =>
+        Math.max(...box.filter((_, index) => index % 2 === 1)) -
+        Math.min(...box.filter((_, index) => index % 2 === 1)),
+    ),
     conf: words.map((word) => word.confidence ?? 0),
     text: words.map((word) => word.text ?? ""),
   };

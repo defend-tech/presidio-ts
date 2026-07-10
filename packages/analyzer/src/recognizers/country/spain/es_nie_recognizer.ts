@@ -1,11 +1,11 @@
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /** ES_NIE recognizer for ES region. */
 export class EsNieRecognizer extends PatternRecognizer {
   static override readonly COUNTRY_CODE = "es";
 
   static readonly PATTERNS = [
-
+    new Pattern("NIE", "\\b[X-Z]?[0-9]?[0-9]{7}[-]?[A-Z]\\b", 0.5),
   ];
 
   static readonly CONTEXT = ["número de identificación de extranjero", "NIE"];
@@ -13,8 +13,8 @@ export class EsNieRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supported_language: string = "en",
-    supported_entity: string = "ES_NIE",
+    supported_language = "en",
+    supported_entity = "ES_NIE",
     name: string | null = null,
   ) {
     super(
@@ -26,5 +26,4 @@ export class EsNieRecognizer extends PatternRecognizer {
       context ?? EsNieRecognizer.CONTEXT,
     );
   }
-
 }

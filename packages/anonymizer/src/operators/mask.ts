@@ -1,5 +1,5 @@
-import { Operator } from "./operator.js";
 import { OperatorType } from "./operator-type.js";
+import { Operator } from "./operator.js";
 
 /**
  * Mask operator - masks parts of the PII text.
@@ -26,10 +26,9 @@ export class Mask extends Operator {
       // Mask from end: "1234567890" -> "1234******" (charsToMask=6, fromEnd=true)
       const keepChars = text.length - charsToMask;
       return text.substring(0, keepChars) + maskingChar.repeat(charsToMask);
-    } else {
-      // Mask from start: "1234567890" -> "******7890" (charsToMask=6, fromEnd=false)
-      return maskingChar.repeat(charsToMask) + text.substring(charsToMask);
     }
+    // Mask from start: "1234567890" -> "******7890" (charsToMask=6, fromEnd=false)
+    return maskingChar.repeat(charsToMask) + text.substring(charsToMask);
   }
 
   validate(params: Record<string, unknown>): void {

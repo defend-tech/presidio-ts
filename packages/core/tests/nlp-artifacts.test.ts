@@ -1,4 +1,4 @@
-import { NlpArtifacts } from "@presidio/core";
+import { NlpArtifacts } from "@defend-tech/presidio-core";
 
 describe("NlpArtifacts", () => {
   describe("constructor", () => {
@@ -94,14 +94,7 @@ describe("NlpArtifacts", () => {
     });
 
     test("toJson output includes all NlpArtifacts fields", () => {
-      const artifacts = new NlpArtifacts(
-        ["A"],
-        ["a"],
-        [0],
-        ["a"],
-        [],
-        "en",
-      );
+      const artifacts = new NlpArtifacts(["A"], ["a"], [0], ["a"], [], "en");
       const parsed = JSON.parse(artifacts.toJson());
       expect(parsed).toHaveProperty("entities");
       expect(parsed).toHaveProperty("tokens");
@@ -121,15 +114,7 @@ describe("NlpArtifacts", () => {
     });
 
     test("null scores uses defaults", () => {
-      const artifacts = new NlpArtifacts(
-        ["A"],
-        ["a"],
-        [0],
-        ["a"],
-        [],
-        "en",
-        null,
-      );
+      const artifacts = new NlpArtifacts(["A"], ["a"], [0], ["a"], [], "en", null);
       expect(artifacts.scores).toEqual([0.85]);
     });
   });

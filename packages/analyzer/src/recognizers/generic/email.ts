@@ -1,6 +1,6 @@
 import { parse } from "tldts";
 
-import { Pattern, PatternRecognizer } from "@presidio/core";
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /**
  * Recognize email addresses using regex with TLD validation.
@@ -31,8 +31,8 @@ export class EmailRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "EMAIL_ADDRESS",
+    supportedLanguage = "en",
+    supportedEntity = "EMAIL_ADDRESS",
     name: string | null = null,
   ) {
     super(
@@ -56,9 +56,10 @@ export class EmailRecognizer extends PatternRecognizer {
    * @returns `true` if the domain has a valid domain (FQDN), `false` otherwise
    */
   validateResult(patternText: string): boolean {
-    const result = parse(patternText);
+    const domain = patternText.slice(patternText.lastIndexOf("@") + 1);
+    const result = parse(domain, { allowPrivateDomains: false });
     // For email addresses, the domain field will be empty if no valid
     // TLD is found. If found, it is non-empty.
-    return result.domain !== null && result.domain !== "";
+    return result.isIcann === true && result.domain !== null && result.domain !== "";
   }
 }

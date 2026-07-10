@@ -1,4 +1,4 @@
-import { EntityRecognizer, Pattern, PatternRecognizer } from "@presidio/core";
+import { EntityRecognizer, Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 
 /**
  * Recognize common credit card numbers using regex + Luhn checksum.
@@ -42,8 +42,8 @@ export class CreditCardRecognizer extends PatternRecognizer {
   constructor(
     patterns: Pattern[] | null = null,
     context: string[] | null = null,
-    supportedLanguage: string = "en",
-    supportedEntity: string = "CREDIT_CARD",
+    supportedLanguage = "en",
+    supportedEntity = "CREDIT_CARD",
     replacementPairs: [string, string][] | null = null,
     name: string | null = null,
   ) {
@@ -55,7 +55,10 @@ export class CreditCardRecognizer extends PatternRecognizer {
       null,
       context ?? CreditCardRecognizer.CONTEXT,
     );
-    this.replacementPairs = replacementPairs ?? [[ "-", "" ], [ " ", "" ]];
+    this.replacementPairs = replacementPairs ?? [
+      ["-", ""],
+      [" ", ""],
+    ];
   }
 
   /**
@@ -90,7 +93,10 @@ export class CreditCardRecognizer extends PatternRecognizer {
     let checksum = oddDigits.reduce((sum, d) => sum + d, 0);
     for (const d of evenDigits) {
       const doubled = d * 2;
-      checksum += String(doubled).split("").map(Number).reduce((s, n) => s + n, 0);
+      checksum += String(doubled)
+        .split("")
+        .map(Number)
+        .reduce((s, n) => s + n, 0);
     }
     return checksum % 10 === 0;
   }

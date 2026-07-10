@@ -1,5 +1,10 @@
-import type { AnalyzerEngine, AnalyzeOptions } from "@presidio/analyzer";
-import type { RecognizerResult } from "@presidio/core";
+import type { AnalyzeOptions, AnalyzerEngine } from "@defend-tech/presidio-analyzer";
+import type {
+  AnonymizerEngine,
+  EngineResult,
+  OperatorConfig,
+} from "@defend-tech/presidio-anonymizer";
+import type { RecognizerResult } from "@defend-tech/presidio-core";
 
 /** Per-column analyzer settings for structured data. */
 export interface ColumnConfig {
@@ -49,4 +54,23 @@ export interface ColumnAnalysisResult {
 /** Structured PII analysis grouped by column. */
 export interface StructuredAnalysisResult {
   columns: Record<string, ColumnAnalysisResult>;
+}
+
+/** Per-cell output from structured anonymization. */
+export interface CellAnonymizationResult {
+  rowIndex: number;
+  value: unknown;
+  result?: EngineResult;
+}
+
+/** Structured anonymization grouped by selected column. */
+export interface StructuredAnonymizationResult {
+  rows: Array<Record<string, unknown>>;
+  columns: Record<string, CellAnonymizationResult[]>;
+}
+
+/** Configuration for a structured anonymization pass. */
+export interface StructuredAnonymizeConfig extends StructuredConfig {
+  anonymizer?: AnonymizerEngine;
+  operators?: Record<string, OperatorConfig>;
 }

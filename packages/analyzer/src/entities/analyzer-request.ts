@@ -1,5 +1,5 @@
+import { Pattern, PatternRecognizer } from "@defend-tech/presidio-core";
 import { z } from "zod";
-import { PatternRecognizer, Pattern } from "@presidio/core";
 
 /**
  * Zod schema for an ad-hoc recognizer definition in an `AnalyzerRequest`.
@@ -11,13 +11,15 @@ export const AdHocRecognizerSchema = z.object({
   name: z.string().nullable().optional(),
   supported_language: z.string().optional(),
   supportedLanguage: z.string().optional(),
-  patterns: z.array(
-    z.object({
-      name: z.string(),
-      regex: z.string(),
-      score: z.number().min(0).max(1),
-    }),
-  ).optional(),
+  patterns: z
+    .array(
+      z.object({
+        name: z.string(),
+        regex: z.string(),
+        score: z.number().min(0).max(1),
+      }),
+    )
+    .optional(),
   deny_list: z.array(z.string()).optional(),
   denyList: z.array(z.string()).optional(),
   context: z.array(z.string()).optional(),
@@ -113,8 +115,9 @@ export class AnalyzerRequest {
 
     this.context = parsed.context ?? undefined;
     this.allowList = parsed.allowList ?? parsed.allow_list ?? undefined;
-    this.allowListMatch =
-      (parsed.allowListMatch ?? parsed.allow_list_match ?? "exact") as "exact" | "regex";
+    this.allowListMatch = (parsed.allowListMatch ?? parsed.allow_list_match ?? "exact") as
+      | "exact"
+      | "regex";
     this.regexFlags = parsed.regexFlags ?? parsed.regex_flags ?? undefined;
   }
 
@@ -128,21 +131,23 @@ export class AnalyzerRequest {
 function createPatternRecognizerFromAdHoc(
   raw: z.infer<typeof AdHocRecognizerSchema>,
 ): PatternRecognizer {
-  const entity: string = raw.supportedEntity ?? (raw.supported_entity ?? "Unknown");
+  const entity: string = raw.supportedEntity ?? raw.supported_entity ?? "Unknown";
   const name: string | null = raw.name ?? null;
-  const supportedLanguage: string = raw.supportedLanguage ?? (raw.supported_language ?? "en");
+  const supportedLanguage: string =
+    raw.supportedLanguage ?? raw.supported_language ?? "en";
   const context: string[] | null = raw.context ?? null;
-  const denyListScore: number = raw.denyListScore ?? (raw.deny_list_score ?? 1.0);
-  const globalRegexFlags: string = raw.globalRegexFlags ?? (raw.global_regex_flags ?? "gmsi");
+  const denyListScore: number = raw.denyListScore ?? raw.deny_list_score ?? 1.0;
+  const globalRegexFlags: string =
+    raw.globalRegexFlags ?? raw.global_regex_flags ?? "gmsi";
   const version: string = raw.version ?? "0.0.1";
-  const countryCode: string | null = raw.countryCode ?? (raw.country_code ?? null);
+  const countryCode: string | null = raw.countryCode ?? raw.country_code ?? null;
 
   let patterns: Pattern[] | null = null;
   if (raw.patterns) {
     patterns = raw.patterns.map((p) => new Pattern(p.name, p.regex, p.score));
   }
 
-  const denyList: string[] | null = raw.denyList ?? (raw.deny_list ?? null);
+  const denyList: string[] | null = raw.denyList ?? raw.deny_list ?? null;
 
   return new PatternRecognizer(
     entity,

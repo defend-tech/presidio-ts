@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { AnonymizerEngine } from "../src/engine/anonymizer-engine.js";
 import { DeanonymizeEngine } from "../src/engine/deanonymize-engine.js";
-import { RecognizerResult } from "../src/entities/recognizer-result.js";
-import { OperatorConfig } from "../src/entities/operator-config.js";
 import { ConflictResolutionStrategy } from "../src/entities/conflict-resolution.js";
 import { EngineResult } from "../src/entities/engine-result.js";
-import { Replace } from "../src/operators/replace.js";
+import { OperatorConfig } from "../src/entities/operator-config.js";
+import { RecognizerResult } from "../src/entities/recognizer-result.js";
 import { Decrypt } from "../src/operators/decrypt.js";
+import { Replace } from "../src/operators/replace.js";
 
 // ---------------------------------------------------------------------------
 // AnonymizerEngine — Basic Operations
@@ -69,7 +69,7 @@ describe("AnonymizerEngine — basic anonymize", () => {
   it("anonymizes multiple entities of different types", async () => {
     const text = "John lives at 123 Main St";
     const results = [
-      new RecognizerResult("PERSON", 0, 4, 0.9),  // "John"
+      new RecognizerResult("PERSON", 0, 4, 0.9), // "John"
       new RecognizerResult("ADDRESS", 14, 25, 0.8), // "123 Main St"
     ];
 
@@ -100,7 +100,7 @@ describe("AnonymizerEngine — basic anonymize", () => {
     expect(engineResult.text).toBe("Call <PHONE_NUMBER> now");
   });
 
-it("uses DEFAULT operator when entity type has no specific operator", async () => {
+  it("uses DEFAULT operator when entity type has no specific operator", async () => {
     const text = "My secret data";
     const results = [new RecognizerResult("SECRETS", 3, 9, 0.9)];
     const operators = {
@@ -266,11 +266,9 @@ describe("AnonymizerEngine + DeanonymizeEngine — encrypt/decrypt roundtrip", (
     const text = "My SSN is 123-45-6789";
     const results = [new RecognizerResult("SSN", 10, 21, 0.95)];
 
-    const encryptResult = await encryptEngine.anonymize(
-      text,
-      results,
-      { SSN: new OperatorConfig("encrypt", { key }) },
-    );
+    const encryptResult = await encryptEngine.anonymize(text, results, {
+      SSN: new OperatorConfig("encrypt", { key }),
+    });
 
     // The SSN should be encrypted
     expect(encryptResult.text).not.toContain("123-45-6789");
@@ -294,11 +292,9 @@ describe("AnonymizerEngine + DeanonymizeEngine — encrypt/decrypt roundtrip", (
     const text = "Contact 555-1234 today";
     const results = [new RecognizerResult("PHONE_NUMBER", 8, 16, 0.8)];
 
-    const encrypted = await encryptEngine.anonymize(
-      text,
-      results,
-      { PHONE_NUMBER: new OperatorConfig("encrypt", { key }) },
-    );
+    const encrypted = await encryptEngine.anonymize(text, results, {
+      PHONE_NUMBER: new OperatorConfig("encrypt", { key }),
+    });
 
     const item = encrypted.items[0];
     const decrypted = await decryptEngine.deanonymize(
@@ -372,9 +368,9 @@ describe("AnonymizerEngine — operator validation on missing config", () => {
       }),
     };
 
-    await expect(
-      engine.anonymize(text, results, operators),
-    ).rejects.toThrow("masking_char must be a string");
+    await expect(engine.anonymize(text, results, operators)).rejects.toThrow(
+      "masking_char must be a string",
+    );
   });
 
   it("throws when mask is used with invalid masking_char length", async () => {
@@ -388,9 +384,9 @@ describe("AnonymizerEngine — operator validation on missing config", () => {
       }),
     };
 
-    await expect(
-      engine.anonymize(text, results, operators),
-    ).rejects.toThrow("masking_char must be a character");
+    await expect(engine.anonymize(text, results, operators)).rejects.toThrow(
+      "masking_char must be a character",
+    );
   });
 
   it("throws when custom is used without lambda", async () => {
@@ -400,9 +396,9 @@ describe("AnonymizerEngine — operator validation on missing config", () => {
       WORD: new OperatorConfig("custom"),
     };
 
-    await expect(
-      engine.anonymize(text, results, operators),
-    ).rejects.toThrow("New value must be a callable function");
+    await expect(engine.anonymize(text, results, operators)).rejects.toThrow(
+      "New value must be a callable function",
+    );
   });
 
   it("throws when encrypt is used without key", async () => {
@@ -412,9 +408,7 @@ describe("AnonymizerEngine — operator validation on missing config", () => {
       WORD: new OperatorConfig("encrypt"),
     };
 
-    await expect(
-      engine.anonymize(text, results, operators),
-    ).rejects.toThrow();
+    await expect(engine.anonymize(text, results, operators)).rejects.toThrow();
   });
 
   it("custom operator works through the engine with entity_type param", async () => {
@@ -528,8 +522,8 @@ describe("AnonymizerEngine — edge cases", () => {
     // Use different entity types so mergeEntitiesWithSpaces doesn't merge them
     const text = "A B";
     const results = [
-      new RecognizerResult("TYPE_ONE", 0, 1, 0.5),  // A
-      new RecognizerResult("TYPE_TWO", 2, 3, 0.5),  // B
+      new RecognizerResult("TYPE_ONE", 0, 1, 0.5), // A
+      new RecognizerResult("TYPE_TWO", 2, 3, 0.5), // B
     ];
 
     const engineResult = await engine.anonymize(text, results);
@@ -542,9 +536,9 @@ describe("AnonymizerEngine — edge cases", () => {
   it("EngineResult items are sorted by start index ascending", async () => {
     const text = "aaa bbb ccc";
     const results = [
-      new RecognizerResult("TYPE_A", 4, 7, 0.5),   // "bbb"
-      new RecognizerResult("TYPE_B", 0, 3, 0.5),   // "aaa"
-      new RecognizerResult("TYPE_C", 8, 11, 0.5),  // "ccc"
+      new RecognizerResult("TYPE_A", 4, 7, 0.5), // "bbb"
+      new RecognizerResult("TYPE_B", 0, 3, 0.5), // "aaa"
+      new RecognizerResult("TYPE_C", 8, 11, 0.5), // "ccc"
     ];
 
     const engineResult = await engine.anonymize(text, results);

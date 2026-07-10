@@ -1,4 +1,4 @@
-import { Pattern, PatternRecognizer, RecognizerResult } from "@presidio/core";
+import { Pattern, PatternRecognizer, RecognizerResult } from "@defend-tech/presidio-core";
 
 describe("PatternRecognizer", () => {
   describe("constructor validation", () => {
@@ -117,7 +117,10 @@ describe("PatternRecognizer", () => {
 
   describe("denyList functionality", () => {
     test("detects deny list items in text (case insensitive)", () => {
-      const rec = new PatternRecognizer("TITLE", null, "en", null, ["secret", "classified"]);
+      const rec = new PatternRecognizer("TITLE", null, "en", null, [
+        "secret",
+        "classified",
+      ]);
       const results = rec.analyze("This is SECRET data", ["TITLE"], null);
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].entityType).toBe("TITLE");
@@ -131,15 +134,7 @@ describe("PatternRecognizer", () => {
     });
 
     test("custom denyListScore is used", () => {
-      const rec = new PatternRecognizer(
-        "TITLE",
-        null,
-        "en",
-        null,
-        ["Mr"],
-        null,
-        0.6,
-      );
+      const rec = new PatternRecognizer("TITLE", null, "en", null, ["Mr"], null, 0.6);
       const results = rec.analyze("Mr Smith", ["TITLE"], null);
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].score).toBe(0.6);
@@ -225,7 +220,9 @@ describe("PatternRecognizer", () => {
   describe("toDict", () => {
     test("includes patterns, deny_list, context, and supported_entity", () => {
       const pattern = new Pattern("digits", "\\d+", 0.5);
-      const rec = new PatternRecognizer("NUM", "NumRec", "en", [pattern], null, ["number"]);
+      const rec = new PatternRecognizer("NUM", "NumRec", "en", [pattern], null, [
+        "number",
+      ]);
       const dict = rec.toDict();
       expect(dict.supported_entity).toEqual(["NUM"]);
       expect(dict.supported_entities).toEqual(["NUM"]);

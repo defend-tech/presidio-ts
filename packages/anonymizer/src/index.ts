@@ -1,4 +1,6 @@
 export { AnonymizerEngine } from "./engine/anonymizer-engine.js";
+export { BatchAnonymizerEngine } from "./engine/batch-anonymizer-engine.js";
+export type { DictRecognizerResult } from "./engine/batch-anonymizer-engine.js";
 export { DeanonymizeEngine } from "./engine/deanonymize-engine.js";
 export { OperatorType } from "./operators/operator-type.js";
 export { Operator } from "./operators/operator.js";
