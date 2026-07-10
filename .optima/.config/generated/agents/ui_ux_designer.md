@@ -3,6 +3,7 @@ description: Ensures the UI/UX is beautiful, intuitive, and user-appealing.
   Provides design input and reviews visual implementations.
 mode: subagent
 tools: {}
+model: chatgpt/gpt-5.6-terra
 disable: false
 ---
 

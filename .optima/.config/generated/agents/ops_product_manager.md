@@ -39,6 +39,7 @@ permission:
     df -h: allow
     free -h: allow
     uptime: allow
+model: chatgpt/gpt-5.6-sol
 disable: false
 ---
 

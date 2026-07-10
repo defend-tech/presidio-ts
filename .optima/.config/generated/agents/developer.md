@@ -7,6 +7,7 @@ tools:
   optima_qa_request_slot: true
   optima_qa_chrome_command: true
   optima_qa_finish: true
+model: chatgpt/gpt-5.6-terra
 disable: false
 ---
 

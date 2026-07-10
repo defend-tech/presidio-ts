@@ -5,6 +5,7 @@ mode: all
 tools:
   optima_start_discussion: true
   optima_stop_discussion: true
+model: chatgpt/gpt-5.6-luna
 disable: false
 ---
 

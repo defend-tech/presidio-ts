@@ -5,6 +5,7 @@ mode: all
 tools:
   optima_init: true
   optima_validate: true
+model: chatgpt/gpt-5.6-sol
 disable: false
 ---
 

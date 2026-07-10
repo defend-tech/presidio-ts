@@ -1,0 +1,13 @@
+export { DeBsnrRecognizer } from "./de_bsnr_recognizer";
+export { DeFuehrerscheinRecognizer } from "./de_fuehrerschein_recognizer";
+export { DeHandelsregisterRecognizer } from "./de_handelsregister_recognizer";
+export { DeHealthInsuranceRecognizer } from "./de_health_insurance_recognizer";
+export { DeIdCardRecognizer } from "./de_id_card_recognizer";
+export { DeKfzRecognizer } from "./de_kfz_recognizer";
+export { DeLanrRecognizer } from "./de_lanr_recognizer";
+export { DePassportRecognizer } from "./de_passport_recognizer";
+export { DePlzRecognizer } from "./de_plz_recognizer";
+export { DeSocialSecurityRecognizer } from "./de_social_security_recognizer";
+export { DeTaxIdRecognizer } from "./de_tax_id_recognizer";
+export { DeTaxNumberRecognizer } from "./de_tax_number_recognizer";
+export { DeVatIdRecognizer } from "./de_vat_id_recognizer";

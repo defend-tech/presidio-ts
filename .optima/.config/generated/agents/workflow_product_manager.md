@@ -26,6 +26,7 @@ tools:
   optima_github_verify_vercel_pr: true
   optima_github_merge_pr: true
   optima_github_commit_worktree: true
+model: chatgpt/gpt-5.6-sol
 disable: false
 ---
 

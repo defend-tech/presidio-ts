@@ -10,6 +10,7 @@ tools:
   optima_stop_discussion: true
   optima_run_workflow: true
   optima_prompt_workflow: true
+model: chatgpt/gpt-5.6-sol
 disable: false
 ---
 
