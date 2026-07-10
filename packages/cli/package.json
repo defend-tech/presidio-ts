@@ -1,0 +1,43 @@
+{
+  "name": "@defend-tech/presidio-cli",
+  "version": "0.0.1",
+  "description": "Presidio CLI tool",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "presidio": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/defend-tech/presidio-ts.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/defend-tech/presidio-ts#readme",
+  "bugs": { "url": "https://github.com/defend-tech/presidio-ts/issues" },
+  "publishConfig": { "registry": "https://npm.pkg.github.com" },
+  "scripts": {
+    "build": "tsup-node src/index.ts src/cli.ts --dts --format esm,cjs --clean",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@defend-tech/presidio-analyzer": "^0.0.1",
+    "@defend-tech/presidio-anonymizer": "^0.0.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

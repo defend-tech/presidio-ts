@@ -1,0 +1,44 @@
+{
+  "name": "@defend-tech/presidio-image-redactor",
+  "version": "0.0.1",
+  "description": "Presidio image redaction engine",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsup-node src/index.ts --dts --format esm,cjs --clean",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@defend-tech/presidio-analyzer": "^0.0.1",
+    "@defend-tech/presidio-core": "^0.0.1"
+  },
+  "optionalDependencies": {
+    "dicom-parser": "^1.8.21",
+    "tesseract.js": "^7.0.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/defend-tech/presidio-ts.git",
+    "directory": "packages/image-redactor"
+  },
+  "homepage": "https://github.com/defend-tech/presidio-ts#readme",
+  "bugs": { "url": "https://github.com/defend-tech/presidio-ts/issues" },
+  "publishConfig": { "registry": "https://npm.pkg.github.com" },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
