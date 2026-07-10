@@ -13,7 +13,9 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup-node src/index.ts --dts --format esm,cjs --clean",
     "test": "vitest run",
@@ -21,8 +23,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@presidio/analyzer": "*",
     "@presidio/core": "*",
-    "@presidio/analyzer": "*"
+    "dicom-parser": "^1.8.21",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "vitest": "^2.1.8"

@@ -26,22 +26,22 @@ export class UrlRecognizer extends PatternRecognizer {
   public static readonly PATTERNS: Pattern[] = [
     new Pattern(
       "Standard Url",
-      "(?i)(?:https?://)" + BASE_URL_REGEX,
+      "(?:https?://)" + BASE_URL_REGEX,
       0.6,
     ),
     new Pattern(
       "Non schema URL",
-      "(?i)" + BASE_URL_REGEX,
+      BASE_URL_REGEX,
       0.5,
     ),
     new Pattern(
       "Quoted URL",
-      '(?i)["\'](https?://' + BASE_URL_REGEX + ')["\']',
+      '["\'](https?://' + BASE_URL_REGEX + ')["\']',
       0.6,
     ),
     new Pattern(
       "Quoted Non-schema URL",
-      '(?i)["\'](' + BASE_URL_REGEX + ')["\']',
+      '["\'](' + BASE_URL_REGEX + ')["\']',
       0.5,
     ),
   ];
