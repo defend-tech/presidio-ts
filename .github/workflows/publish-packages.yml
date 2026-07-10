@@ -115,7 +115,7 @@ jobs:
               fi
               action=skip
               echo "${name}@${version} already exists with the expected integrity; it will be skipped."
-            elif rg -q 'npm error code E404|\bE404\b' "$error_file"; then
+            elif grep -Eq 'npm error code E404|(^|[^[:alnum:]_])E404([^[:alnum:]_]|$)' "$error_file"; then
               action=publish
               echo "${name}@${version} is absent (explicit npm E404)."
             else
