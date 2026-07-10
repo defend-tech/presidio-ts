@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "paths": {
+      "@presidio/core": ["./packages/core/src"],
+      "@presidio/core/*": ["./packages/core/src/*"],
+      "@presidio/analyzer": ["./packages/analyzer/src"],
+      "@presidio/analyzer/*": ["./packages/analyzer/src/*"],
+      "@presidio/anonymizer": ["./packages/anonymizer/src"],
+      "@presidio/anonymizer/*": ["./packages/anonymizer/src/*"],
+      "@presidio/image-redactor": ["./packages/image-redactor/src"],
+      "@presidio/image-redactor/*": ["./packages/image-redactor/src/*"],
+      "@presidio/structured": ["./packages/structured/src"],
+      "@presidio/structured/*": ["./packages/structured/src/*"],
+      "@presidio/cli": ["./packages/cli/src"],
+      "@presidio/cli/*": ["./packages/cli/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

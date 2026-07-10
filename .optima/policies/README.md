@@ -1,0 +1,127 @@
+# Optima Policies
+
+Optima keeps core workflow behavior in the plugin and lets repositories override opinionated delivery policies in this repo-local `.optima/policies/` directory.
+
+## How Policy Resolution Works
+
+For any `<include:policy:<file>.md>` include, Optima resolves policy files in this order:
+
+1. `.optima/policies/<file>.md`
+2. bundled plugin default from package assets (`assets/policies/<file>.md`)
+
+Files under `.optima/.config/generated/policies/` are reference copies only. They are not read directly at runtime.
+
+## Available Policies
+
+- `development-guidelines.md`
+  - Repository-specific engineering rules, stack notes, and implementation conventions.
+  - Used by: `developer`, `technical_architect`, `tech_lead`, `workflow_runner`
+
+- `testing-guidelines.md`
+  - Testing, evidence, regression, and verification conventions.
+  - Used by: `developer`, `qa_engineer`, `tech_lead`, `workflow_runner`
+
+- `documentation-guidelines.md`
+  - Documentation layout, naming, ownership, and update expectations.
+  - Used by all agents through the shared prompt.
+
+- `definition-of-ready.md`
+  - Canonical readiness criteria before execution begins.
+  - Used by all agents through the shared prompt and reflected in task templates.
+
+- `definition-of-done.md`
+  - Canonical completion criteria before closure.
+  - Used by all agents through the shared prompt and reflected in task templates.
+
+- `git-commit-messaging.md`
+  - Commit subject and body rules.
+  - Used by: `tech_lead`, `workflow_runner`
+
+- `product-guidelines.md`
+  - User story, acceptance criteria, terminology, and product-truth conventions.
+  - Used by: `product_manager`, `business_analyst`
+
+- `ui-ux-guidelines.md`
+  - UI review standards and visual quality expectations.
+  - Used by: `ui_ux_designer`
+
+## Customizing A Policy
+
+1. Set `.optima/.config/optima.yaml` `policies.extract_defaults` to `all` if you want reference copies of all bundled defaults.
+2. Inspect `.optima/.config/generated/policies/` for the default files.
+3. Copy the policy you want to customize into `.optima/policies/`.
+4. Edit the copied file. The repo-local version will override the plugin default automatically.
+
+## Policy Extraction
+
+`policies.extract_defaults` supports:
+
+- `none`: do not generate reference policy files
+- `all`: write all bundled default policy files to `.optima/.config/generated/policies/`
+
+Only files in `.optima/policies/` affect runtime prompt behavior.
+
+## Legacy Content From .staticeng/policies/README.md
+
+# StaticEng Policies
+
+StaticEng keeps core workflow behavior in the plugin and lets repositories override opinionated delivery policies in this repo-local `.staticeng/policies/` directory.
+
+## How Policy Resolution Works
+
+For any `<include:policy:<file>.md>` include, StaticEng resolves policy files in this order:
+
+1. `.staticeng/policies/<file>.md`
+2. bundled plugin default `policies/<file>.md`
+
+Files under `.staticeng/.config/generated/policies/` are reference copies only. They are not read directly at runtime.
+
+## Available Policies
+
+- `development-guidelines.md`
+  - Repository-specific engineering rules, stack notes, and implementation conventions.
+  - Used by: `developer`, `technical_architect`, `tech_lead`
+
+- `testing-guidelines.md`
+  - Testing, evidence, regression, and verification conventions.
+  - Used by: `developer`, `qa_engineer`, `tech_lead`
+
+- `documentation-guidelines.md`
+  - Documentation layout, naming, ownership, and update expectations.
+  - Used by all agents through the shared prompt.
+
+- `definition-of-ready.md`
+  - Canonical readiness criteria before execution begins.
+  - Used by all agents through the shared prompt and reflected in task templates.
+
+- `definition-of-done.md`
+  - Canonical completion criteria before closure.
+  - Used by all agents through the shared prompt and reflected in task templates.
+
+- `git-commit-messaging.md`
+  - Commit subject and body rules.
+  - Used by: `tech_lead`
+
+- `product-guidelines.md`
+  - User story, acceptance criteria, terminology, and product-truth conventions.
+  - Used by: `product_manager`, `business_analyst`
+
+- `ui-ux-guidelines.md`
+  - UI review standards and visual quality expectations.
+  - Used by: `ui_ux_designer`
+
+## Customizing A Policy
+
+1. Set `.staticeng/.config/staticeng.yaml` `policies.extract_defaults` to `all` if you want reference copies of all bundled defaults.
+2. Inspect `.staticeng/.config/generated/policies/` for the default files.
+3. Copy the policy you want to customize into `.staticeng/policies/`.
+4. Edit the copied file. The repo-local version will override the plugin default automatically.
+
+## Policy Extraction
+
+`policies.extract_defaults` supports:
+
+- `none`: do not generate reference policy files
+- `all`: write all bundled default policy files to `.staticeng/.config/generated/policies/`
+
+Only files in `.staticeng/policies/` affect runtime prompt behavior.

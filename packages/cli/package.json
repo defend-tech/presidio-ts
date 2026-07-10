@@ -1,0 +1,34 @@
+{
+  "name": "@presidio/cli",
+  "version": "0.0.1",
+  "description": "Presidio CLI tool",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "presidio": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup-node src/index.ts --dts --format esm,cjs --clean",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@presidio/core": "*",
+    "@presidio/analyzer": "*",
+    "@presidio/anonymizer": "*"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@presidio/analyzer",
+  "version": "0.0.1",
+  "description": "Presidio PII analyzer engine and recognizers",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup-node src/index.ts --dts --format esm,cjs --clean",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@presidio/core": "*",
+    "ibantools": "^4.5.4",
+    "libphonenumber-js": "^1.13.8",
+    "tldts": "^7.4.8",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
