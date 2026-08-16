@@ -75,7 +75,7 @@ function parsePatterns(lineBlock) {
     const score = scoreMatch ? Number.parseFloat(scoreMatch[2]) : 0.05;
 
     if (strings.length >= 2 && scoreMatch) {
-      const name = strings[0].replace(/"/g, '\\"');
+      const name = escapeForTSString(strings[0]);
       const regex = strings[1].replace(/\\/g, "\\\\").replace(/"/g, '\\"');
       results.push(`        new Pattern("${name}", "${regex}", ${score})`);
     }
